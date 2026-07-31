@@ -151,14 +151,22 @@ Upload **`public/google-logo.png`** directly — it already meets these specs.
 > verifiable homepage and a matching privacy policy on your verified domain
 > must be linked from both the homepage and the consent screen.
 
-## Privacy policy
+## Legal pages
 
-A ready-to-customize **[`privacy.html`](./privacy.html)** is included and
-linked from the site footer. For brand verification you must:
+Two ready-to-customize legal pages are included and linked from the site
+footer:
 
-1. Host this page on the **same verified domain** as your homepage.
-2. Link it from your **homepage**.
-3. Put the **same URL** into the OAuth consent screen's **Privacy Policy** field.
+- **[`privacy.html`](./privacy.html)** — Privacy Policy
+- **[`terms.html`](./terms.html)** — Terms of Service
+
+Both are styled to match the dark museum theme and are emitted into `dist/`
+during `npm run build` (see `vite.config.js`). For Google brand verification
+you must:
+
+1. Host these pages on the **same verified domain** as your homepage.
+2. Link them from your **homepage** (already done in the footer).
+3. Put the **same Privacy Policy URL** into the OAuth consent screen's
+   **Privacy Policy** field.
 4. Customize the contact details and any wording to reflect your real identity
    and practices.
 
