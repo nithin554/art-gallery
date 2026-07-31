@@ -32,7 +32,7 @@ export const PICKER_CONFIG = {
   apiKey: 'YOUR_GOOGLE_API_KEY',
 
   /** Your OAuth 2.0 Web Application Client ID */
-  clientId: 'YOUR_GOOGLE_CLIENT_ID',
+  clientId: '455796875759-52o5h325ud53g5l7kgicg1v3fss35fqk.apps.googleusercontent.com',
 
   /** The Photos Picker API endpoint base URL. */
   baseUrl: 'https://photospicker.googleapis.com/v1',

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#2a2521" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Terms of Service · The Gallery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Inter:wght@300;400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --wall: #2a2521;
+        --ink: #e9e2d4;
+        --ink-dim: #a99e8b;
+        --gold: #c9a24b;
+        --serif: 'Cormorant Garamond', Georgia, serif;
+        --sans: 'Inter', system-ui, sans-serif;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        font-weight: 300;
+        line-height: 1.7;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 50% 0%, rgba(255,255,255,0.03), transparent 60%),
+          linear-gradient(180deg, var(--wall), #1d1916);
+        background-attachment: fixed;
+        min-height: 100vh;
+      }
+      article {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: clamp(2.5rem, 8vw, 4.5rem) 1.5rem 4rem;
+      }
+      h1 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(2rem, 6vw, 3rem);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin: 0 0 0.4rem;
+      }
+      h1::after {
+        content: '';
+        display: block;
+        width: 64px; height: 1px;
+        margin-top: 0.9rem;
+        background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      }
+      .meta { color: var(--ink-dim); font-size: 0.85rem; margin-bottom: 2.2rem; }
+      .back {
+        display: inline-block;
+        margin-bottom: 2rem;
+        color: var(--gold);
+        text-decoration: none;
+        letter-spacing: 0.04em;
+        font-size: 0.9rem;
+      }
+      .back:hover { text-decoration: underline; }
+      h2 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 1.35rem;
+        letter-spacing: 0.03em;
+        margin: 2.2rem 0 0.6rem;
+        color: var(--gold);
+      }
+      h3 { font-size: 1rem; margin: 1.2rem 0 0.4rem; }
+      p, li { font-size: 0.98rem; }
+      code {
+        background: rgba(0,0,0,0.3);
+        padding: 0.1rem 0.35rem;
+        border-radius: 3px;
+        font-size: 0.9em;
+      }
+      a { color: var(--gold); }
+      ul, ol { padding-left: 1.2rem; }
+      address { font-style: normal; }
+    </style>
+  </head>
+  <body>
+    <article>
+      <a class="back" href="./index.html">← Back to the gallery</a>
+      <h1>Terms of Service</h1>
+      <p class="meta">Effective date: <time datetime="2026-07-31">July 31, 2026</time></p>
+
+      <p>These Terms of Service (&ldquo;Terms&rdquo;) govern your use of
+      <strong>The Gallery</strong> (the &ldquo;Site&rdquo;). By accessing or
+      using the Site, you agree to these Terms. If you do not agree, please do
+      not use the Site.</p>
+
+      <h2>1. The Site</h2>
+      <p>The Gallery is a static, client-side web page that lets you select
+      photographs from your own Google Photos account and display them as a
+      framed museum&ndash;style wall in your browser. We do not operate a
+      server, database, or user-account system.</p>
+
+      <h2>2. Your use of the Site</h2>
+      <p>You are permitted to use the Site for personal, non-commercial
+      purposes. You agree not to:</p>
+      <ul>
+        <li>reverse engineer, decompile, or attempt to derive the source code
+        of the Site in a manner prohibited by law;</li>
+        <li>use the Site to violate any applicable law or regulation;</li>
+        <li>attempt to disrupt, overload, or interfere with the availability or
+        security of the Site.</li>
+      </ul>
+
+      <h2>3. Your content</h2>
+      <p>The photographs you select remain in <em>your</em> Google Photos
+      account. We do not store, copy, or republish them on any server. The
+      selection you make is stored only in your browser&rsquo;s
+      <code>localStorage</code> on your device. You are responsible for having
+      the necessary rights to the photographs you choose to display.</p>
+
+      <h2>4. Google services</h2>
+      <p>The Site uses the Google Photos Picker API to let you select photos.
+      Your use of Google accounts and services is governed by Google&rsquo;s own
+      terms and policies, which we do not control.</p>
+
+      <h2>5. Intellectual property</h2>
+      <p>The Site design, text, and branding are provided under applicable
+      open-source licensing terms shown in the project. All other rights not
+      expressly granted are reserved.</p>
+
+      <h2>6. No warranty</h2>
+      <p>The Site is provided &ldquo;as is&rdquo; and &ldquo;as available,&rdquo;
+      without warranties of any kind, whether express or implied, including but
+      not limited to implied warranties of merchantability, fitness for a
+      particular purpose, and non-infringement.</p>
+
+      <h2>7. Limitation of liability</h2>
+      <p>To the maximum extent permitted by law, the operators of the Site
+      shall not be liable for any indirect, incidental, special, consequential,
+      or punitive damages, or any loss of data, arising out of or related to
+      your use of the Site.</p>
+
+      <h2>8. Indemnification</h2>
+      <p>You agree to indemnify and hold harmless the operators of the Site from
+      any claims, losses, or expenses arising out of your misuse of the Site or
+      your violation of these Terms.</p>
+
+      <h2>9. Privacy</h2>
+      <p>Your use of the Site is also subject to our
+      <a href="./privacy.html">Privacy Policy</a>, which explains how we handle
+      information.</p>
+
+      <h2>10. Changes to these Terms</h2>
+      <p>We may revise these Terms from time to time. Any changes will be
+      posted on this page with an updated &ldquo;Effective date.&rdquo;</p>
+
+      <h2>11. Governing law</h2>
+      <p>These Terms are governed by the laws of the place of residence of the
+      Site operator, without regard to conflict-of-law principles.</p>
+
+      <h2>12. Contact</h2>
+      <address>
+        <p>For questions about these Terms, contact the site owner at the
+        address shown on your site&rsquo;s homepage.</p>
+      </address>
+    </article>
+  </body>
+</html>
