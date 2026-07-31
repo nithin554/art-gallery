@@ -16,15 +16,9 @@ env:
   GH_TOKEN: ${{ github.token }}
 # Grant the GITHUB_TOKEN the permissions needed to deploy to Pages.
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
-  packages: write
-
-# Only allow one Pages deployment at a time; cancel superseded runs.
-concurrency:
-  group: pages
-  cancel-in-progress: true
 
 jobs:
   create-release:
@@ -146,6 +140,9 @@ jobs:
   # Deploy only when the event is a push to main (or a manual dispatch).
   # Pull-request builds skip deployment and are just a compilation check.
   deploy:
+    concurrency:
+      group: pages
+      cancel-in-progress: true
     name: Deploy
     needs: build
     if: github.event_name != 'pull_request'
