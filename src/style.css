@@ -1,0 +1,456 @@
+/* ============================================================
+   The Gallery · A darkened museum wall
+   ============================================================ */
+
+:root {
+  --wall: #2a2521;
+  --wall-deep: #1d1916;
+  --floor-hint: #17130f;
+  --frame: #372f26;
+  --frame-edge: #4c443a;
+  --mat-light: #f2ede4;
+  --mat-dark: #e2dac9;
+  --ink: #e9e2d4;
+  --ink-dim: #a99e8b;
+  --gold: #c9a24b;
+  --gold-soft: #e0c27a;
+  --serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  min-height: 100vh;
+}
+
+body {
+  font-family: var(--sans);
+  color: var(--ink);
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(255, 255, 255, 0.03),
+      transparent 60%
+    ),
+    linear-gradient(180deg, var(--wall) 0%, var(--wall-deep) 100%);
+  background-attachment: fixed;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+/* ---------- Masthead ---------- */
+.masthead {
+  position: relative;
+  text-align: center;
+  padding: clamp(3.5rem, 10vh, 6rem) 1rem 2rem;
+}
+
+.gallery-title {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(2.5rem, 7vw, 4.5rem);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.gallery-title::after {
+  content: '';
+  display: block;
+  width: 72px;
+  height: 1px;
+  margin: 1.1rem auto 0;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.gallery-tagline {
+  margin-top: 0.9rem;
+  font-weight: 300;
+  font-style: italic;
+  letter-spacing: 0.06em;
+  color: var(--ink-dim);
+}
+
+/* ---------- Stage / wall ---------- */
+.stage {
+  width: min(1440px, 94%);
+  margin: 0 auto;
+  padding-bottom: 4rem;
+}
+
+.gallery-wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: clamp(2rem, 4vw, 3.5rem);
+  justify-items: center;
+  padding-top: 1rem;
+}
+
+/* ---------- Empty state ---------- */
+.empty-state {
+  text-align: center;
+  padding: clamp(2rem, 6vh, 4rem) 1rem;
+  border: 1px dashed rgba(201, 162, 75, 0.35);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.12);
+  max-width: 680px;
+  margin: 2rem auto;
+}
+
+.empty-state.hidden {
+  display: none;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 0.6rem;
+}
+
+.empty-state h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 1.8rem;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.5rem;
+}
+
+.empty-hint {
+  color: var(--ink-dim);
+  max-width: 40ch;
+  margin: 0 auto 1.6rem;
+}
+
+/* ---------- Buttons ---------- */
+.btn-primary {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #17130f;
+  background: linear-gradient(180deg, var(--gold-soft), var(--gold));
+  border: none;
+  border-radius: 2px;
+  padding: 0.9rem 2.2rem;
+  cursor: pointer;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25), 0 8px 20px rgba(0, 0, 0, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================================
+   Artworks — the framed pieces
+   ============================================================ */
+.artwork {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  background:
+    linear-gradient(160deg, var(--frame-edge), var(--frame) 40%, var(--frame));
+  padding: clamp(10px, 1.2vw, 16px); /* the frame lip */
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.4),
+    0 2px 0 rgba(255, 255, 255, 0.03),
+    0 18px 34px rgba(0, 0, 0, 0.55);
+  /* Subtle stagger so the wall feels hand-hung */
+  transform: translateY(var(--stagger, 0)) rotate(var(--tilt, 0));
+  cursor: zoom-in;
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.25s ease;
+}
+
+/* Varying heights give the wall its natural, museum-like rhythm */
+.artwork:nth-child(3n + 1) {
+  --stagger: 0px;
+  --tilt: -0.5deg;
+}
+.artwork:nth-child(3n + 2) {
+  --stagger: 14px;
+  --tilt: 0.4deg;
+}
+.artwork:nth-child(3n + 3) {
+  --stagger: 6px;
+  --tilt: -0.2deg;
+}
+
+.artwork:hover {
+  transform: translateY(var(--stagger, 0)) rotate(var(--tilt, 0)) scale(1.02);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4), 0 26px 48px rgba(0, 0, 0, 0.6);
+  z-index: 2;
+}
+
+/* Outer gold fillet between picture and frame */
+.artwork::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgba(201, 162, 75, 0.45);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* White mat (mount) around the image */
+.artwork::after {
+  content: '';
+  position: absolute;
+  inset: clamp(12px, 1.6vw, 20px);
+  background: var(--mat-light);
+  z-index: 0;
+}
+
+.artwork-img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  margin: 0;
+  /* Matting */
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+  background: var(--mat-dark);
+  user-select: none;
+}
+
+/* ---------- Plaque / nameplate ---------- */
+.plaque {
+  position: absolute;
+  bottom: clamp(6px, 1vw, 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  font-family: var(--serif);
+  font-size: clamp(0.62rem, 0.9vw, 0.78rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  background: linear-gradient(180deg, var(--mat-dark), var(--mat-light));
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 0.35rem 0.9rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  max-width: 80%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Remove control ---------- */
+.artwork-remove {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 4;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--ink);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.artwork:hover .artwork-remove,
+.artwork-remove:focus-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.artwork-remove:hover {
+  background: rgba(160, 40, 30, 0.85);
+}
+
+/* ============================================================
+   Lightbox
+   ============================================================ */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 12, 10, 0.92);
+  backdrop-filter: blur(4px);
+  padding: 2rem;
+}
+
+.modal.open {
+  display: flex;
+}
+
+.modal-content {
+  position: relative;
+  max-width: min(90vw, 1200px);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background:
+    linear-gradient(160deg, var(--frame-edge), var(--frame) 45%, var(--frame));
+  padding: clamp(10px, 1.2vw, 18px);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+}
+
+.modal-content::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgba(201, 162, 75, 0.5);
+  pointer-events: none;
+}
+
+.modal-content img {
+  display: block;
+  max-width: 100%;
+  max-height: 78vh;
+  object-fit: contain;
+  background: var(--mat-light);
+  padding: clamp(14px, 2vw, 32px);
+}
+
+.modal-caption {
+  font-family: var(--serif);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  padding-top: 0.8rem;
+  max-width: 90%;
+  text-align: center;
+}
+
+.modal-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid rgba(233, 226, 212, 0.25);
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--ink);
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.modal-nav:hover {
+  background: var(--gold);
+  color: #17130f;
+}
+
+.modal-prev {
+  left: 1.5rem;
+}
+.modal-next {
+  right: 1.5rem;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.5rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.5);
+  color: var(--ink);
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.modal-close:hover {
+  background: var(--gold);
+  color: #17130f;
+}
+
+/* ============================================================
+   Colophon / footer
+   ============================================================ */
+.colophon {
+  text-align: center;
+  padding: 0.5rem 1rem 2.5rem;
+  color: var(--ink-dim);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  border-top: 1px solid rgba(233, 226, 212, 0.08);
+  margin-top: 1rem;
+}
+
+.colophon a {
+  color: var(--gold-soft);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(201, 162, 75, 0.4);
+}
+
+.colophon a:hover {
+  border-bottom-color: var(--gold-soft);
+}
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translate(-50%, 20px);
+  z-index: 200;
+  background: rgba(20, 16, 12, 0.92);
+  border: 1px solid rgba(201, 162, 75, 0.4);
+  color: var(--ink);
+  font-size: 0.9rem;
+  letter-spacing: 0.03em;
+  padding: 0.8rem 1.4rem;
+  border-radius: 2px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 720px) {
+  .gallery-wall {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 2rem;
+  }
+  .artwork-img {
+    height: 240px;
+  }
+  .modal-prev {
+    left: 0.5rem;
+  }
+  .modal-next {
+    right: 0.5rem;
+  }
+}

@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#2a2521" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Privacy Policy · The Gallery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Inter:wght@300;400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --wall: #2a2521;
+        --ink: #e9e2d4;
+        --ink-dim: #a99e8b;
+        --gold: #c9a24b;
+        --serif: 'Cormorant Garamond', Georgia, serif;
+        --sans: 'Inter', system-ui, sans-serif;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        font-weight: 300;
+        line-height: 1.7;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 50% 0%, rgba(255,255,255,0.03), transparent 60%),
+          linear-gradient(180deg, var(--wall), #1d1916);
+        background-attachment: fixed;
+        min-height: 100vh;
+      }
+      article {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: clamp(2.5rem, 8vw, 4.5rem) 1.5rem 4rem;
+      }
+      h1 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(2rem, 6vw, 3rem);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin: 0 0 0.4rem;
+      }
+      h1::after {
+        content: '';
+        display: block;
+        width: 64px; height: 1px;
+        margin-top: 0.9rem;
+        background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      }
+      .meta { color: var(--ink-dim); font-size: 0.85rem; margin-bottom: 2.2rem; }
+      h2 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 1.35rem;
+        letter-spacing: 0.03em;
+        margin: 2.2rem 0 0.6rem;
+        color: var(--gold);
+      }
+      h3 { font-size: 1rem; margin: 1.2rem 0 0.4rem; }
+      p, li { font-size: 0.98rem; }
+      code {
+        background: rgba(0,0,0,0.3);
+        padding: 0.1rem 0.35rem;
+        border-radius: 3px;
+        font-size: 0.9em;
+      }
+      a { color: var(--gold); }
+      ul { padding-left: 1.2rem; }
+    </style>
+  </head>
+  <body>
+    <article>
+      <h1>Privacy Policy</h1>
+      <p class="meta">Effective date: <time datetime="2026-07-31">July 31, 2026</time></p>
+
+      <p>This Privacy Policy explains how <strong>The Gallery</strong> (the
+      &ldquo;Site&rdquo;) collects, uses, and shares information when you use
+      it to build a photographic wall from your Google Photos library.</p>
+
+      <h2>1. What this Site does</h2>
+      <p>The Gallery is a purely static, client-side web page. It lets you
+      select photographs from your own Google Photos account and display them
+      as a framed museum&ndash;style wall in your browser. There is
+      <strong>no server or database</strong> behind this Site.</p>
+
+      <h2>2. Information we process</h2>
+      <h3>Google Photos selection</h3>
+      <p>When you choose photographs, we use the Google Photos Picker API,
+      which opens Google Photos so <em>you</em> can select which items to
+      share. The Google Photos Picker API returns to the Site only the specific
+      media items you chose &mdash; not your full library &mdash; along with a
+      temporary access token used to fetch those items.</p>
+
+      <h3>Local storage on your device</h3>
+      <p>The set of image URLs you have selected is stored in your
+      browser&rsquo;s <code>localStorage</code> so that your gallery wall
+      persists when you return. This data stays on <em>your device</em> and is
+      never transmitted to us.</p>
+
+      <h2>3. How we use information</h2>
+      <ul>
+        <li>To display your selected photos on the gallery wall.</li>
+        <li>To persist your wall locally between visits.</li>
+      </ul>
+      <p>We do <strong>not</strong> use your photos, selection history, or
+      personal data for advertising, analytics, profiling, or any purpose
+      other than operating the Site&rsquo;s gallery feature.</p>
+
+      <h2>4. Sharing of information</h2>
+      <p>We do <strong>not</strong> sell, transfer, or share your personal data
+      or your photographs with any third parties. The only external service
+      involved is Google (via the Google Photos Picker API), which processes
+      your selection solely to provide the picking feature you initiate. Your
+      photos remain in your Google Photos account and are not copied to us.</p>
+
+      <h2>5. Retention</h2>
+      <p>We retain no copies of your photos or personal data. Your selected
+      image references remain only in your browser&rsquo;s
+      <code>localStorage</code> until you clear it or delete them from the
+      wall. The temporary OAuth/access tokens are short-lived and are discarded
+      after use.</p>
+
+      <h2>6. Your choices</h2>
+      <p>You can remove any photograph from the wall at any time, and you can
+      clear the saved wall by clearing your browser&rsquo;s site data. You can
+      revoke the Site&rsquo;s access to your Google Photos at any time from
+      your <a href="https://myaccount.google.com/permissions" rel="noopener">Google
+      account permissions page</a>.</p>
+
+      <h2>7. Children&rsquo;s privacy</h2>
+      <p>This Site is not directed to children, and we do not knowingly process
+      data from children.</p>
+
+      <h2>8. Changes to this policy</h2>
+      <p>We may update this Privacy Policy from time to time. Any changes will
+      be posted on this page with an updated &ldquo;Effective date.&rdquo;</p>
+
+      <h2>9. Contact</h2>
+      <p>For questions about this Privacy Policy or your data, contact the
+      site owner at the address shown on your site&rsquo;s homepage.</p>
+    </article>
+  </body>
+</html>
