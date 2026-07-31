@@ -61,7 +61,9 @@ function showToast(message) {
 function renderWall() {
   galleryWall.innerHTML = '';
   emptyState.classList.toggle('hidden', items.length > 0);
-  addMoreLink.parentElement.style.display = items.length ? 'block' : 'none';
+  // Only hide the "Add photographs" action link, not the whole footer (which
+  // also carries the privacy policy and terms links).
+  addMoreLink.style.display = items.length ? 'inline' : 'none';
 
   items.forEach((item, index) => {
     const figure = document.createElement('figure');
