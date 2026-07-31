@@ -1,0 +1,159 @@
+# Build the static site and deploy it to GitHub Pages.
+#
+# Triggers on push to main and on manual dispatch, plus pull requests to main
+# (where it only builds, without deploying, as a smoke check).
+name: Build & Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "**"
+
+env:
+  GH_TOKEN: ${{ github.token }}
+# Grant the GITHUB_TOKEN the permissions needed to deploy to Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  packages: write
+
+# Only allow one Pages deployment at a time; cancel superseded runs.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+      version: ${{ steps.tag.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: "0"
+
+      - name: Configure Git
+        shell: bash
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Determine increment type
+        id: increment
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "type=${{ github.event.inputs.increment }}" >> $GITHUB_OUTPUT
+          else
+            echo "type=patch" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create version tag
+        id: tag
+        shell: bash
+        run: |
+          git fetch --tags origin '+refs/heads/main:refs/remotes/origin/main'
+          COMMIT_SHA=$(git rev-parse HEAD)
+          
+          # Get the latest tag on main branch only
+          PREVIOUS_TAG=$(git tag --merged origin/main --sort=-version:refname | head -1)
+          
+          if [ -z "$PREVIOUS_TAG" ]; then
+            PREVIOUS_TAG="0.0.0"
+          fi
+          
+          # Strip leading 'v' if present
+          PREVIOUS_TAG="${PREVIOUS_TAG#v}"
+          
+          echo "Previous tag: $PREVIOUS_TAG"
+          TAG=$(node .github/scripts/generate-version.js "$PREVIOUS_TAG" "${{ steps.increment.outputs.type }}")
+          
+          echo "Tagging commit $COMMIT_SHA with v$TAG"
+          git tag "v$TAG" $COMMIT_SHA
+          git push origin "v$TAG"
+          
+          echo "tag=v$TAG" >> $GITHUB_OUTPUT
+          echo "version=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes
+        id: notes
+        shell: bash
+        run: |
+          PREVIOUS_TAG=$(git tag --merged origin/main --sort=-version:refname | head -2 | tail -1)
+          if [ -z "$PREVIOUS_TAG" ]; then
+            echo "notes=Initial release of art-gallery" >> $GITHUB_OUTPUT
+          else
+            NOTES=$(git log --oneline --no-decorate "$PREVIOUS_TAG..HEAD" 2>/dev/null || echo "No changes since last release")
+            NOTES="${NOTES//'%'/'%25'}"
+            NOTES="${NOTES//$'\n'/'%0A'}"
+            NOTES="${NOTES//$'\r'/'%0D'}"
+            echo "notes=$NOTES" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Release
+        shell: bash
+        run: |
+          gh release create "${{ steps.tag.outputs.tag }}" \
+            --title "${{ steps.tag.outputs.tag }}" \
+            --notes "${{ steps.notes.outputs.notes }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 25
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # REPO_NAME makes Vite emit asset URLs under /<repo>/, which is how a
+      # project page is served (https://<user>.github.io/<repo>/).
+      - name: Build the site
+        run: npm run build
+        env:
+          REPO_NAME: ${{ github.event.repository.name }}
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload Pages artifact
+        id: upload
+        uses: actions/upload-pages-artifact@v5
+        with:
+          # Upload everything Vite emitted into dist/.
+          path: dist
+
+      - name: Confirm artifact
+        run: test -f dist/index.html && echo "Site built successfully."
+
+  # Deploy only when the event is a push to main (or a manual dispatch).
+  # Pull-request builds skip deployment and are just a compilation check.
+  deploy:
+    name: Deploy
+    needs: build
+    if: github.event_name != 'pull_request'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
