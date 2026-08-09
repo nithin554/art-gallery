@@ -129,6 +129,58 @@ function bytesToBase64(bytes) {
 }
 
 /**
+ * Parse Google's model output into {name, description}.
+ *
+ * The model sometimes wraps the JSON in a ```json fenced block, adds prose
+ * before/after it, uses unquoted keys ({ name : ... }), or even truncates.
+ * We are deliberately lenient: pull out the first "{" ... last "}" chunk and
+ * try strict JSON.parse; if that fails, quote any bare keys and retry. If we
+ * still can't get a real title, return null so the caller can pick a fallback.
+ *
+ * @param {string} text raw Gemini text
+ * @returns {{name: string, description: string}|null}
+ */
+function parseOverview(text) {
+  if (!text) return null;
+
+  // Extract the JSON object region (or, failing that, the raw text).
+  const first = text.indexOf('{');
+  const last = text.lastIndexOf('}');
+  const chunk =
+    first !== -1 && last !== -1 && last > first
+      ? text.slice(first, last + 1).trim()
+      : text.trim();
+
+  // 1) Strict parse.
+  try {
+    return normalize(JSON.parse(chunk));
+  } catch {
+    /* fall through to lenient parsing */
+  }
+
+  // 2) Lenient parse — the model sometimes emits unquoted keys like
+  //    { name : "...", description : "..." }. Quote the known keys first.
+  try {
+    const fixed = chunk
+      .replace(/([{,]\s*)(name|description)(\s*:)/gi, '$1"$2"$3')
+      .replace(/'/g, '"');
+    return normalize(JSON.parse(fixed));
+  } catch {
+    return null;
+  }
+}
+
+/** Coerce a parsed object into {name, description} with safe defaults. */
+function normalize(parsed) {
+  return {
+    name: (parsed && parsed.name ? String(parsed.name).trim() : '') || '',
+    description: (parsed && parsed.description
+      ? String(parsed.description).trim()
+      : '') || ''
+  };
+}
+
+/**
  * Call Google Gemini (vision) to get an artistic name + short description for
  * an image, given its bytes and content type.
  *
@@ -150,7 +202,9 @@ async function describeWithGemini(bytes, contentType, apiKey, model) {
               '1) a short evocative title (5 words or fewer, no quotes, no leading "Title:"), ' +
               '2) a 1-sentence description (about 15-25 words) highlighting the beauty, ' +
               'mood, light, color, or composition. ' +
-              'Return ONLY valid JSON like: {"name":"...","description":"..."}'
+              'Return ONLY a single valid JSON object with exactly these two ' +
+              'quoted keys: {"name":"...","description":"..."}. No prose, no ' +
+              'markdown, no code fences, no thinking out loud.'
           },
           {
             inline_data: {
@@ -161,7 +215,14 @@ async function describeWithGemini(bytes, contentType, apiKey, model) {
         ]
       }
     ],
-    generationConfig: { temperature: 0.8, maxOutputTokens: 160 }
+    // response_mime_type: "application/json" puts the model into strict JSON
+    // mode, which eliminates most malformed outputs (unquoted keys/values,
+    // prose, truncation) that were producing "Untitled".
+    generationConfig: {
+      temperature: 0.8,
+      maxOutputTokens: 512,
+      response_mime_type: 'application/json'
+    }
   };
 
   const resp = await fetch(endpoint, {
@@ -178,29 +239,21 @@ async function describeWithGemini(bytes, contentType, apiKey, model) {
   const data = await resp.json();
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-  try {
-    // Gemini sometimes wraps the JSON in a ```json fenced block or adds prose
-    // before/after it. Robustly extract just the JSON object: everything from
-    // the first "{" to the last "}", then parse that.
-    const first = text.indexOf('{');
-    const last = text.lastIndexOf('}');
-    if (first === -1 || last === -1 || last < first) {
-      throw new Error('No JSON object found in Gemini response');
-    }
-    const cleaned = text.slice(first, last + 1).trim();
-    const parsed = JSON.parse(cleaned);
+  // Parse leniently; if the model utterly failed to produce JSON, fall back to
+  // the raw text so the description is at least something instead of blank.
+  const overview = parseOverview(text);
+  if (overview) {
     return {
-      name: (parsed.name || '').trim() || 'Untitled',
-      description: (parsed.description || '').trim()
+      name: overview.name || 'Untitled',
+      description: overview.description || ''
     };
-  } catch (err) {
-    // Fallback: use the raw text as the description.
-    const cleaned = text
-      .replace(/["'`\n\r]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-    return { name: 'Untitled', description: cleaned };
   }
+
+  const cleaned = text
+    .replace(/["'`\n\r]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return { name: 'Untitled', description: cleaned };
 }
 
 /**
