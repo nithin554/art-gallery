@@ -179,16 +179,26 @@ async function describeWithGemini(bytes, contentType, apiKey, model) {
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
   try {
-    // Gemini may wrap the JSON in a fenced code block; strip it.
-    const cleaned = text.replace(/```(?:json)?/gi, '').trim();
+    // Gemini sometimes wraps the JSON in a ```json fenced block or adds prose
+    // before/after it. Robustly extract just the JSON object: everything from
+    // the first "{" to the last "}", then parse that.
+    const first = text.indexOf('{');
+    const last = text.lastIndexOf('}');
+    if (first === -1 || last === -1 || last < first) {
+      throw new Error('No JSON object found in Gemini response');
+    }
+    const cleaned = text.slice(first, last + 1).trim();
     const parsed = JSON.parse(cleaned);
     return {
       name: (parsed.name || '').trim() || 'Untitled',
       description: (parsed.description || '').trim()
     };
-  } catch {
+  } catch (err) {
     // Fallback: use the raw text as the description.
-    const cleaned = text.replace(/["'`\n\r]/g, ' ').trim();
+    const cleaned = text
+      .replace(/["'`\n\r]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
     return { name: 'Untitled', description: cleaned };
   }
 }
@@ -254,7 +264,7 @@ export default {
           bytes,
           mimeFor(artKey),
           env.GEMINI_API_KEY,
-          env.GEMINI_MODEL || 'gemini-2.0-flash'
+          env.GEMINI_MODEL || 'gemini-2.5-flash-lite'
         );
 
         // 3. Cache it (fire-and-forget so we don't block the response).
