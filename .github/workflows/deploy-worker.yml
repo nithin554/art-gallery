@@ -70,7 +70,16 @@ jobs:
       # Idempotent: lists existing jobs, creates a new one if none match this
       # worker, otherwise updates the match. Skipped if NEW_RELIC_LICENSE_KEY
       # isn't set (so the deploy still works without New Relic).
+      #
+      # Note: New Relic is an HTTP log destination, so per Cloudflare's docs
+      # there is NO "ownership challenge" step (that's only for file-based
+      # destinations like S3/R2). If this step returns a 403, your
+      # CLOUDFLARE_API_TOKEN is missing the "Logs: Edit" (account) permission.
       - name: Configure New Relic Logpush
+        # Secrets can't be used directly in `if:` in Actions, so expose the
+        # license key via env and gate on that. When the secret is unset this
+        # resolves to an empty string and the step is skipped.
+        if: env.NEW_RELIC_LICENSE_KEY != ''
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -82,40 +91,40 @@ jobs:
           # US endpoint by default, allow EU override via secret.
           BASE="${LOGPUSH_BASE_URL:-https://log-api.newrelic.com/log/v1}"
 
-          # New Relic HTTP destination for Cloudflare-formatted logs.
+          # New Relic HTTP destination for Cloudflare-formatted worker logs.
           DEST="${BASE}?Api-Key=${NEW_RELIC_LICENSE_KEY}&format=cloudflare"
           JOB_NAME="art-gallery-worker-logpush"
 
+          # Account-scoped Logpush API (workers_trace_events is account-scoped).
           CF="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/logpush"
           AUTH="Authorization: Bearer ${CLOUDFLARE_API_TOKEN}"
           CT="Content-Type: application/json"
 
-          # 1. Prove ownership of the New Relic destination.
-          OWN=$(curl -fsS -X POST "${CF}/ownership" \
-            -H "$AUTH" -H "$CT" \
-            --data "{\"destination_conf\":\"$DEST\"}")
-          CHALLENGE=$(echo "$OWN" | jq -r '.result.filename')
-
-          # 2. Find an existing job pointing at this worker so we update, not dup.
-          JOB_ID=$(curl -fsS "${CF}/jobs?dataset=workers_trace_events" \
+          # Find an existing job for this worker so we update, not duplicate.
+          JOB_ID=$(curl -sS "${CF}/jobs?dataset=workers_trace_events" \
             -H "$AUTH" \
-            | jq -r ".result[] | select(.name==\"$JOB_NAME\") | .id" | head -n1)
+            | jq -r ".result[]? | select(.name==\"$JOB_NAME\") | .id" | head -n1)
 
           PAYLOAD=$(jq -nc \
             --arg name "$JOB_NAME" \
             --arg dest "$DEST" \
-            --arg challenge "$CHALLENGE" \
             '{name:$name, dataset:"workers_trace_events", enabled:true,
-              destination_conf:$dest, ownership_challenge:$challenge,
+              destination_conf:$dest,
+              max_upload_bytes:5000000,
               output_options:{field_names:["Event","EventTimestampMs","Outcome",
                 "Exceptions","Logs","ScriptName"]}}')
 
           if [ -n "$JOB_ID" ]; then
-            echo "Updating Logpush job $JOB_ID for New Relic…"
-            curl -fsS -X PUT "${CF}/jobs/${JOB_ID}" -H "$AUTH" -H "$CT" \
-              --data "$PAYLOAD" | jq '.success, .errors'
+            echo "Updating Logpush job ${JOB_ID} for New Relic…"
+            RESP=$(curl -sS -X PUT "${CF}/jobs/${JOB_ID}" -H "$AUTH" -H "$CT" \
+              --data "$PAYLOAD")
           else
             echo "Creating New Relic Logpush job…"
-            curl -fsS -X POST "${CF}/jobs" -H "$AUTH" -H "$CT" \
-              --data "$PAYLOAD" | jq '.success, .errors'
+            RESP=$(curl -sS -X POST "${CF}/jobs" -H "$AUTH" -H "$CT" \
+              --data "$PAYLOAD")
           fi
+
+          # Surface the Cloudflare response for diagnosis, and fail if !success.
+          echo "$RESP" | jq .
+          echo "$RESP" | jq -e '.success == true' >/dev/null \
+            || { echo "::error::Cloudflare rejected the Logpush job."; exit 1; }
