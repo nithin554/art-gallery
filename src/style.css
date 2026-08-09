@@ -352,6 +352,23 @@ body.modal-open {
   text-align: center;
 }
 
+.modal-caption-title {
+  display: block;
+  color: var(--ink);
+  letter-spacing: 0.14em;
+}
+
+.modal-caption-desc {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.95rem;
+  font-style: italic;
+  line-height: 1.5;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  color: var(--gold-soft);
+}
+
 .modal-nav {
   position: absolute;
   top: 50%;

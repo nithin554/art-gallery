@@ -1,8 +1,17 @@
-# Deploy the Cloudflare Worker that lists the R2 bucket's `art` folder.
+# Deploy the Cloudflare Worker that lists the R2 bucket's `art` folder and
+# generates AI artwork overviews via Gemini (vision).
 #
 # Uses the Cloudflare Wrangler GitHub Action. It reads the worker source and
 # config from `worker/` and connects to your Cloudflare account via the
-# CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID secrets.
+# CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID secrets. The GEMINI_API_KEY
+# (and optional GEMINI_MODEL) repo secrets are written to the Worker as
+# secrets before each deploy.
+#
+# Repository secrets needed:
+#   CLOUDFLARE_API_TOKEN  → Cloudflare API token (Workers Scripts: Edit + R2)
+#   CLOUDFLARE_ACCOUNT_ID → Cloudflare account ID
+#   GEMINI_API_KEY        → Google Gemini (vision) key (free tier OK)
+#   GEMINI_MODEL          → (optional) model, e.g. gemini-2.0-flash
 #
 # Triggers:
 #   - push to main (when worker/ files or this workflow change)
@@ -40,3 +49,11 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           # Deploy the worker (wrangler deploy) rather than dry-run.
           command: deploy
+          # Write these names as Worker secrets (wrangler secret put) before
+          # deploying. Each name must have a matching entry under `env` below.
+          secrets: |
+            GEMINI_API_KEY
+            GEMINI_MODEL
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ secrets.GEMINI_MODEL }}

@@ -1,5 +1,10 @@
 import './style.css';
-import { isConfigured, loadGallery, thumbnailUrl } from './r2.js';
+import {
+  isConfigured,
+  loadGallery,
+  thumbnailUrl,
+  describeUrl
+} from './r2.js';
 
 const STORAGE_KEY = 'art-gallery-items';
 const MAX_ITEMS = 24;
@@ -21,6 +26,29 @@ const nextImage = document.getElementById('nextImage');
 let items = [];
 /** @type {string|null} */
 let currentId = null;
+
+/** In-memory cache of AI overviews, keyed by artwork id (`{name, description}`). */
+const descriptions = new Map();
+
+/**
+ * Fetch (and cache) the AI overview for an artwork. Never rejects — on any
+ * failure it resolves to null so the UI can fall back to the file name.
+ * @param {string} key
+ * @returns {Promise<{name: string, description: string}|null>}
+ */
+async function ensureDescription(key) {
+  if (descriptions.has(key)) return descriptions.get(key);
+  try {
+    const resp = await fetch(describeUrl(key), { cache: 'no-cache' });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    if (!data || typeof data.name !== 'string') return null;
+    descriptions.set(key, data);
+    return data;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Persist the gallery to localStorage so the wall survives reloads (the order
@@ -85,6 +113,14 @@ function renderWall() {
     caption.className = 'plaque';
     caption.textContent = prettyName(item.name);
 
+    // Enrich the nameplate with the AI-curated title once ready.
+    ensureDescription(item.name).then((overview) => {
+      if (overview && overview.name && caption.isConnected) {
+        caption.textContent = overview.name;
+        caption.title = overview.description || '';
+      }
+    });
+
     const remove = document.createElement('button');
     remove.className = 'artwork-remove';
     remove.type = 'button';
@@ -117,6 +153,24 @@ function openLightbox(index) {
   lightbox.setAttribute('aria-hidden', 'false');
   document.body.classList.add('modal-open');
   updateNav();
+
+  // Show the AI overview for this artwork as soon as it's available.
+  ensureDescription(item.name).then((overview) => {
+    if (currentId !== item.id) return; // user moved on to another photo
+    if (overview) {
+      lightboxCaption.innerHTML = '';
+      const nameEl = document.createElement('span');
+      nameEl.className = 'modal-caption-title';
+      nameEl.textContent = overview.name || prettyName(item.name);
+      lightboxCaption.appendChild(nameEl);
+      if (overview.description) {
+        const descEl = document.createElement('span');
+        descEl.className = 'modal-caption-desc';
+        descEl.textContent = overview.description;
+        lightboxCaption.appendChild(descEl);
+      }
+    }
+  });
 }
 
 function closeLightboxModal() {

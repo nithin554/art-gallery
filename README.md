@@ -14,6 +14,8 @@ for serving.
 - 🔎 **Lightbox viewer** with keyboard navigation (← → and Esc) and prev/next.
 - 💾 **Persistent wall** — your curation is saved to `localStorage`, so it
   survives reloads.
+- 🤖 **AI overviews** — Google Gemini (vision) gives each artwork an evocative
+  title and a short beauty description (free tier; cached in the bucket).
 - ☁️ **R2-backed** — the wall pulls every file from an `art` folder in a
   Cloudflare R2 bucket through a Worker.
 - ⚡ **Static & fast** — built with Vite, deploys to any static host.
@@ -43,11 +45,13 @@ maintain and no secrets shipped to the browser.
 
 ### Step 2 — Deploy the Worker
 
-The [`worker/`](./worker) directory contains a Worker with three routes:
+The [`worker/`](./worker) directory contains a Worker with four routes:
 
 - `GET /` → the object listing: `{ "files": ["sunset.jpg", ...] }`
 - `GET /img/<key>` → the image bytes (with `Content-Type` + CORS headers)
 - `GET /img/<key>?w=<px>` → the image resized to that width (fast wall tiles)
+- `GET /describe/<key>` → an AI "overview" (`{ "name", "description" }`) for the
+  artwork, generated from the image by Gemini (vision), then cached in the bucket
 
 It uses an **R2 bucket binding**, so no credentials ever reach the browser.
 CORS is handled in the Worker itself, so you don't have to edit any CORS
@@ -113,6 +117,44 @@ action re-queries the Worker to pick up newly added files.
 > 💡 The site auto-loads the wall on first visit; on later visits it keeps the
 > local arrangement (order, removals) you curated. Hit "Refresh from the bucket"
 > to re-sync with the bucket's current contents.
+
+### AI artwork overviews (Gemini vision)
+
+Each artwork can be described by an AI that **actually looks at the photo**. The
+Worker has a `GET /describe/<key>` route that:
+
+1. Reads the image from the bucket,
+2. Sends it to **Google Gemini** (a vision model) asking for a short evocative
+   title + a 1-sentence beauty description,
+3. Returns `{ "name", "description" }` and **caches the result in the bucket**
+   (under `descriptions/`), so repeat loads are free and don't hit Gemini.
+
+To enable it:
+
+1. Get a free Gemini API key from **https://aistudio.google.com/app/apikey**
+   (a Google account is enough; the free tier is generous).
+2. Add it to the GitHub repo **secrets** so the deploy workflow sets it on the
+   Worker automatically (recommended — it never leaves GitHub/Cloudflare):
+   - **Settings → Secrets and variables → Actions → New repository secret**:
+     - `GEMINI_API_KEY` → your Gemini key
+     - `GEMINI_MODEL` → *(optional)* e.g. `gemini-2.0-flash`
+   - The `Deploy R2 Listing Worker` workflow writes these as Worker secrets via
+     `wrangler secret put` before each deploy (see
+     `.github/workflows/deploy-worker.yml`).
+3. Deploy/redeploy the Worker — the GitHub Action does it automatically, or run
+   `npm run worker:deploy` locally.
+   - To set the secret locally instead: `npx wrangler secret put GEMINI_API_KEY
+     --config worker/wrangler.toml`
+
+> 🔒 Why not DeepSeek? DeepSeek's API is **text-only** — it can't "see" an
+> image. To describe the *actual photo* you need a vision model, so this uses
+> Gemini's free tier with vision. If you later prefer another vision provider
+> with an OpenAI-compatible endpoint, the `describeWithGemini` helper in
+> `worker/src/index.js` is the single place to adapt.
+
+The frontend fetches these overviews lazily: the wall nameplate shows the AI
+title once it loads, and the lightbox shows the title + description. The API
+key never reaches the browser — all Gemini calls happen in the Worker.
 
 ## Deploying
 
