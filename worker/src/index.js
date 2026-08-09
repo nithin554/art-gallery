@@ -294,8 +294,15 @@ export default {
         );
       }
 
-      // Cache key = hash of the art key (so URLs stay safe in the path).
-      const cacheKey = encodeURIComponent(artKey);
+      // Derive a clean, URL-safe cache id from the art key. Stripping the
+      // folder prefix and keeping the base filename yields something readable
+      // (e.g. PXL_20260717_135839579.jpg) that's still unique per object.
+      // (A raw encodeURIComponent of the full "art/<file>.jpg" key would embed
+      // a %2F in the stored filename, which is awkward to clean up manually.)
+      const cacheKey = artKey
+        .split('/')
+        .pop() // drop the "art/" folder prefix
+        .replace(/[^a-zA-Z0-9._-]/g, '_'); // keep only URL/path-safe chars
 
       // 1. Return cached result if available.
       const cached = await getCached(bucket, cacheKey);
