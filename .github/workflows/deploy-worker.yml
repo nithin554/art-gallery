@@ -8,10 +8,18 @@
 # secrets before each deploy.
 #
 # Repository secrets needed:
-#   CLOUDFLARE_API_TOKEN  → Cloudflare API token (Workers Scripts: Edit + R2)
-#   CLOUDFLARE_ACCOUNT_ID → Cloudflare account ID
-#   GEMINI_API_KEY        → Google Gemini (vision) key (free tier OK)
-#   GEMINI_MODEL          → (optional) model, e.g. gemini-2.0-flash
+#   CLOUDFLARE_API_TOKEN        → Cloudflare API token (Workers Scripts: Edit +
+#                                 R2 + Logs "Workers Trace Events: Edit")
+#   CLOUDFLARE_ACCOUNT_ID       → Cloudflare account ID
+#   GEMINI_API_KEY              → Google Gemini (vision) key (free tier OK)
+#   GEMINI_MODEL                → (optional) model, e.g. gemini-2.0-flash
+#   NEW_RELIC_LICENSE_KEY       → New Relic ingestion license key; enables a
+#                                 Workers Logpush job that ships worker console
+#                                 logs to New Relic (optional, but needed for
+#                                 the logpush step below)
+#   LOGPUSH_BASE_URL            → (optional) "https://log-api.newrelic.com/log/v1"
+#                                 for US or "...eu.newrelic.com/log/v1" for EU.
+#                                 Defaults to the US endpoint.
 #
 # Triggers:
 #   - push to main (when worker/ files or this workflow change)
@@ -57,3 +65,58 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: ${{ secrets.GEMINI_MODEL }}
+
+      # Ship the worker's console logs to New Relic via Workers Logpush.
+      # Idempotent: lists existing jobs, creates a new one if none match this
+      # worker, otherwise updates the match. Skipped if NEW_RELIC_LICENSE_KEY
+      # isn't set (so the deploy still works without New Relic).
+      - name: Configure New Relic Logpush
+        if: ${{ secrets.NEW_RELIC_LICENSE_KEY != '' }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          NEW_RELIC_LICENSE_KEY: ${{ secrets.NEW_RELIC_LICENSE_KEY }}
+          LOGPUSH_BASE_URL: ${{ secrets.LOGPUSH_BASE_URL }}
+        run: |
+          set -euo pipefail
+
+          # US endpoint by default, allow EU override via secret.
+          BASE="${LOGPUSH_BASE_URL:-https://log-api.newrelic.com/log/v1}"
+
+          # New Relic HTTP destination for Cloudflare-formatted logs.
+          DEST="${BASE}?Api-Key=${NEW_RELIC_LICENSE_KEY}&format=cloudflare"
+          JOB_NAME="art-gallery-worker-logpush"
+
+          CF="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/logpush"
+          AUTH="Authorization: Bearer ${CLOUDFLARE_API_TOKEN}"
+          CT="Content-Type: application/json"
+
+          # 1. Prove ownership of the New Relic destination.
+          OWN=$(curl -fsS -X POST "${CF}/ownership" \
+            -H "$AUTH" -H "$CT" \
+            --data "{\"destination_conf\":\"$DEST\"}")
+          CHALLENGE=$(echo "$OWN" | jq -r '.result.filename')
+
+          # 2. Find an existing job pointing at this worker so we update, not dup.
+          JOB_ID=$(curl -fsS "${CF}/jobs?dataset=workers_trace_events" \
+            -H "$AUTH" \
+            | jq -r ".result[] | select(.name==\"$JOB_NAME\") | .id" | head -n1)
+
+          PAYLOAD=$(jq -nc \
+            --arg name "$JOB_NAME" \
+            --arg dest "$DEST" \
+            --arg challenge "$CHALLENGE" \
+            '{name:$name, dataset:"workers_trace_events", enabled:true,
+              destination_conf:$dest, ownership_challenge:$challenge,
+              output_options:{field_names:["Event","EventTimestampMs","Outcome",
+                "Exceptions","Logs","ScriptName"]}}')
+
+          if [ -n "$JOB_ID" ]; then
+            echo "Updating Logpush job $JOB_ID for New Relic…"
+            curl -fsS -X PUT "${CF}/jobs/${JOB_ID}" -H "$AUTH" -H "$CT" \
+              --data "$PAYLOAD" | jq '.success, .errors'
+          else
+            echo "Creating New Relic Logpush job…"
+            curl -fsS -X POST "${CF}/jobs" -H "$AUTH" -H "$CT" \
+              --data "$PAYLOAD" | jq '.success, .errors'
+          fi
