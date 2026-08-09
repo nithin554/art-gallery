@@ -5,8 +5,11 @@
  * Routes:
  *   GET /                  → JSON listing of objects in the `art` folder
  *                            { "files": ["sunset.jpg", ...] }
- *   GET /img/<key...>      → streams the image bytes for that object with a
- *                            correct Content-Type and Access-Control-Allow-Origin
+ *                            (directory markers like `art/` are filtered out)
+ *   GET /img/<key>         → streams the image bytes with a correct
+ *                            Content-Type and Access-Control-Allow-Origin
+ *   GET /img/<key>?w=<px>  → resizes the image at the edge to the given width
+ *                            (CF image resizing → webp), for fast wall tiles
  */
 
 const ART_FOLDER = 'art';
@@ -47,12 +50,14 @@ function mimeFor(key) {
 }
 
 /**
- * List every object under the `art` folder.
+ * List every real object under the `art` folder.
  *
  * R2's bucket binding exposes `list({ prefix, delimiter })`. It is paginated,
  * so we keep calling until a returned list is truncated, then concatenate.
  *
- * `delimiter` is deliberately omitted so we get all keys (not just "directories").
+ * `delimiter` is deliberately omitted so we get all keys. Keys ending in a `/`
+ * are directory markers (pseudo-folders, e.g. `art/`), not real files, so we
+ * skip them — otherwise they'd produce a broken image tile.
  */
 async function listFiles(bucket) {
   const files = [];
@@ -65,6 +70,7 @@ async function listFiles(bucket) {
     });
 
     for (const obj of listed.objects) {
+      if (obj.key.endsWith('/')) continue; // skip directory markers
       files.push(obj.key);
     }
 
@@ -88,13 +94,15 @@ async function serveImage(bucket, key) {
   const headers = {
     'Content-Type': mimeFor(key),
     'Content-Length': String(object.size),
-    'Cache-Control': 'public, max-age=86400',
+    'Cache-Control': 'public, max-age=86400, s-maxage=86400',
     ...CORS_HEADERS
   };
 
   // Stream the body directly from R2 — no buffering the whole image in memory.
   return new Response(object.body, { headers });
 }
+
+const IMG_RESIZE_PASS_HEADER = 'x-img-resize';
 
 export default {
   async fetch(request, env, ctx) {
@@ -112,10 +120,50 @@ export default {
     const url = new URL(request.url);
     const pathname = url.pathname;
 
-    // /img/<key> → serve the raw object bytes.
+    // /img/<key> → serve the object bytes (optionally resized).
     if (pathname.startsWith('/img/')) {
       const key = pathname.slice('/img/'.length);
       if (!key) return json({ error: 'Missing object key' }, 400);
+
+      const width = parseInt(url.searchParams.get('w') || '', 10);
+
+      // Already a resize pass → serve the raw bytes (the size is baked in).
+      if (request.headers.get(IMG_RESIZE_PASS_HEADER) === '1') {
+        return serveImage(bucket, key);
+      }
+
+      // Request a resized variant at the edge if a width was provided.
+      if (Number.isFinite(width) && width > 0) {
+        const resizeUrl = new URL(url);
+        resizeUrl.searchParams.delete('w');
+        const resizeRequest = new Request(resizeUrl, {
+          headers: {
+            ...request.headers,
+            [IMG_RESIZE_PASS_HEADER]: '1'
+          }
+        });
+        const transformed = await fetch(resizeRequest, {
+          cf: {
+            image: {
+              width,
+              fit: 'scale-down',
+              format: 'webp',
+              sharpness: 0
+            }
+          }
+        });
+        // Merge our CORS/cache headers onto the transformed response.
+        const responseHeaders = new Headers(transformed.headers);
+        Object.entries(CORS_HEADERS).forEach(([k, v]) =>
+          responseHeaders.set(k, v)
+        );
+        responseHeaders.set('Cache-Control', 'public, max-age=31536000, immutable');
+        return new Response(transformed.body, {
+          status: transformed.status,
+          headers: responseHeaders
+        });
+      }
+
       return serveImage(bucket, key);
     }
 

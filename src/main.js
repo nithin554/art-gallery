@@ -1,5 +1,5 @@
 import './style.css';
-import { isConfigured, loadGallery } from './r2.js';
+import { isConfigured, loadGallery, thumbnailUrl } from './r2.js';
 
 const STORAGE_KEY = 'art-gallery-items';
 const MAX_ITEMS = 24;
@@ -75,7 +75,7 @@ function renderWall() {
 
     const img = document.createElement('img');
     img.className = 'artwork-img';
-    img.src = item.url;
+    img.src = thumbnailUrl(item.name);
     img.alt = prettyName(item.name);
     img.loading = 'lazy';
     img.draggable = false;

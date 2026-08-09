@@ -28,6 +28,14 @@ export function objectUrl(key) {
 }
 
 /**
+ * A small, resized variant of an image, for the wall grid. The worker converts
+ * it to a width-800 webp, keeping the first load fast even for large photos.
+ */
+export function thumbnailUrl(key) {
+  return `${objectUrl(key)}?w=800`;
+}
+
+/**
  * Query the Worker for the object keys, then resolve to a list of artworks.
  *
  * Each item is shaped like:

@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Deploy with Wrangler
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           # Root of the worker (contains wrangler.toml).
           workingDirectory: worker

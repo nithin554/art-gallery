@@ -43,10 +43,11 @@ maintain and no secrets shipped to the browser.
 
 ### Step 2 — Deploy the Worker
 
-The [`worker/`](./worker) directory contains a Worker with two routes:
+The [`worker/`](./worker) directory contains a Worker with three routes:
 
 - `GET /` → the object listing: `{ "files": ["sunset.jpg", ...] }`
 - `GET /img/<key>` → the image bytes (with `Content-Type` + CORS headers)
+- `GET /img/<key>?w=<px>` → the image resized to that width (fast wall tiles)
 
 It uses an **R2 bucket binding**, so no credentials ever reach the browser.
 CORS is handled in the Worker itself, so you don't have to edit any CORS
@@ -98,13 +99,16 @@ of `listUrl`. It's where `objectUrl` points for `/<imageBaseUrl>/img/<key>`.
 ### How it works
 
 [`src/r2.js`](./src/r2.js) queries the Worker's `listUrl` for the object keys,
-then builds each image URL as `<imageBaseUrl>/img/<key>`. The worker in
-[`worker/src/index.js`](./worker/src/index.js) pages through the bucket with
-`ART_BUCKET.list({ prefix: 'art/' })` and streams each object's bytes from
-`ART_BUCKET.get(key)` with CORS headers. [`src/main.js`](./src/main.js) renders
-each as a framed artwork and stores the list in `localStorage` so the wall keeps
-your chosen arrangement across reloads. The "Refresh from the bucket" action
-re-queries the Worker to pick up newly added files.
+then builds each image URL as `<imageBaseUrl>/img/<key>`. The wall renders each
+through a **resized thumbnail** (`?w=800`), while the lightbox loads the full
+resolution. The worker in [`worker/src/index.js`](./worker/src/index.js) pages
+through the bucket with `ART_BUCKET.list({ prefix: 'art/' })`, filters out
+directory markers, and streams each object's bytes from `ART_BUCKET.get(key)`
+with CORS headers. When a `w=` width is requested, it resizes the image at the
+edge with Cloudflare's image pipeline (webp). [`src/main.js`](./src/main.js)
+renders each as a framed artwork and stores the list in `localStorage` so the
+wall keeps your chosen arrangement across reloads. The "Refresh from the bucket"
+action re-queries the Worker to pick up newly added files.
 
 > 💡 The site auto-loads the wall on first visit; on later visits it keeps the
 > local arrangement (order, removals) you curated. Hit "Refresh from the bucket"
