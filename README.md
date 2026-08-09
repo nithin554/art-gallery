@@ -14,8 +14,8 @@ for serving.
 - 🔎 **Lightbox viewer** with keyboard navigation (← → and Esc) and prev/next.
 - 💾 **Persistent wall** — your curation is saved to `localStorage`, so it
   survives reloads.
-- ☁️ **R2-backed** — the wall pulls every file from an `art` folder in a public
-  Cloudflare R2 bucket.
+- ☁️ **R2-backed** — the wall pulls every file from an `art` folder in a
+  Cloudflare R2 bucket through a Worker.
 - ⚡ **Static & fast** — built with Vite, deploys to any static host.
 
 ## Getting started
@@ -29,34 +29,34 @@ npm run preview  # preview the production build
 
 ## Setting up Cloudflare R2
 
-The gallery reads artworks from a **public** R2 bucket, and the *list* of files
-comes from a small **Cloudflare Worker** that lists the bucket's `art` folder.
-Everything is served from Cloudflare with no backend to maintain and no secrets
-shipped to the browser.
+The gallery serves its artworks from a **Cloudflare R2 bucket through a
+Worker**. The Worker both *lists* the `art` folder and *streams* the image bytes
+with CORS headers, so images load cross-origin without the browser blocking them
+(`ERR_BLOCKED_BY_ORB`). Everything is served from Cloudflare with no backend to
+maintain and no secrets shipped to the browser.
 
 ### Step 1 — Create & fill the bucket
 
-1. In the Cloudflare dashboard, **R2 → Create bucket** (e.g. `art-gallery-bucket`).
+1. In the Cloudflare dashboard, **R2 → Create bucket** (e.g. `art-gallery`).
 2. Upload your artworks into the **`art`** folder. Any image type the browser
    can render works (jpg, jpeg, png, webp, avif, gif, …).
-3. Make the bucket **public**: **R2 → your bucket → Settings → Public access →
-   Allow access** (or attach a custom domain). Copy the public base URL, e.g.
 
-   ```
-   https://pub-xxxxxxxxxxxxxxxxxxxxxxxxxxxx.r2.dev
-   ```
+### Step 2 — Deploy the Worker
 
-### Step 2 — Deploy the listing Worker
+The [`worker/`](./worker) directory contains a Worker with two routes:
 
-The [`worker/`](./worker) directory contains a Cloudflare Worker that lists the
-objects under `art/` and returns their keys as JSON. It uses an **R2 bucket
-binding**, so no credentials ever reach the browser.
+- `GET /` → the object listing: `{ "files": ["sunset.jpg", ...] }`
+- `GET /img/<key>` → the image bytes (with `Content-Type` + CORS headers)
+
+It uses an **R2 bucket binding**, so no credentials ever reach the browser.
+CORS is handled in the Worker itself, so you don't have to edit any CORS
+settings on the bucket.
 
 1. Open **[`worker/wrangler.toml`](./worker/wrangler.toml)`** and set your bucket
    name in the `bucket_name` field.
 
-2. Deploy it **one of two ways** (below) to get a URL like
-   `https://art-gallery-list.<you>.workers.dev`. A `GET` should return:
+2. Deploy it **one of two ways** (below). After deploying, a `GET` on the root
+   returns:
 
    ```json
    { "files": ["sunset-over-the-hills.jpg", "still-life.paint.jpeg"] }
@@ -86,25 +86,25 @@ Edit **[`src/config.js`](./src/config.js)**:
 
 ```js
 export const R2_CONFIG = {
-  bucketUrl: 'https://pub-xxxxxxxxxxxxx.r2.dev', // public bucket base URL
-  listUrl: 'https://art-gallery-list.<you>.workers.dev', // your Worker URL
-  folder: 'art',
-  sizeSuffix: ''
+  listUrl: 'https://art-gallery-list.<you>.workers.dev',        // listing + images
+  imageBaseUrl: 'https://art-gallery-list.<you>.workers.dev',   // origin for /img/<key>
+  folder: 'art'
 };
 ```
 
-`sizeSuffix` is optional — set it to e.g. `'?w=2048'` if your R2 side setup
-(like an image transform) supports a size hint; otherwise leave it `''`.
+`imageBaseUrl` is the scheme + host of the Worker and is usually just the origin
+of `listUrl`. It's where `objectUrl` points for `/<imageBaseUrl>/img/<key>`.
 
 ### How it works
 
-[`src/r2.js`](./src/r2.js) queries the Worker's `listUrl`, gets the object keys,
-then builds a public URL for each file (`<bucketUrl>/art/<key>`). The worker in
+[`src/r2.js`](./src/r2.js) queries the Worker's `listUrl` for the object keys,
+then builds each image URL as `<imageBaseUrl>/img/<key>`. The worker in
 [`worker/src/index.js`](./worker/src/index.js) pages through the bucket with
-`ART_BUCKET.list({ prefix: 'art/' })` and returns every key. [`src/main.js`](./src/main.js)
-renders each as a framed artwork and stores the list in `localStorage` so the
-wall keeps your chosen arrangement across reloads. The "Refresh from the bucket"
-action re-queries the Worker to pick up newly added files.
+`ART_BUCKET.list({ prefix: 'art/' })` and streams each object's bytes from
+`ART_BUCKET.get(key)` with CORS headers. [`src/main.js`](./src/main.js) renders
+each as a framed artwork and stores the list in `localStorage` so the wall keeps
+your chosen arrangement across reloads. The "Refresh from the bucket" action
+re-queries the Worker to pick up newly added files.
 
 > 💡 The site auto-loads the wall on first visit; on later visits it keeps the
 > local arrangement (order, removals) you curated. Hit "Refresh from the bucket"
@@ -170,11 +170,12 @@ Listing Worker" → Run workflow**).
 
 ## Security note
 
-R2 object storage is served over HTTPS with your own credentials at rest. Making
-the bucket public is fine for public gallery artwork — anyone with the URL can
-view the objects, but no secrets are shipped to the browser and no API keys are
-required client-side. For private collections, keep the bucket private and serve
-it through a signed/authenticated Cloudflare Worker instead.
+R2 object storage is served over HTTPS with your own credentials at rest. Images
+are served through a Worker that returns them with CORS headers, so no CORS
+settings need to be edited on the bucket itself and no API keys are required
+client-side. For a private collection, keep the bucket non-public — the Worker
+serves objects via its `ART_BUCKET` binding regardless of the bucket's public
+access setting.
 
 ## Legal pages
 
