@@ -109,6 +109,26 @@ async function serveImage(bucket, key) {
 const IMG_RESIZE_PASS_HEADER = 'x-img-resize';
 
 /**
+ * Encode a Uint8Array of bytes as base64.
+ *
+ * Builds the string in chunks of at most 0x8000 bytes so we never hit the
+ * engine's per-spread argument limit (which a literal
+ * `btoa(String.fromCharCode(...bigArray))` would blow past for large images).
+ * Works in the Workers runtime (no reliance on a global `btoa`).
+ */
+function bytesToBase64(bytes) {
+  const CHUNK = 0x8000; // 32768 — safely under any call-arg limit
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    binary += String.fromCharCode.apply(
+      null,
+      bytes.subarray(i, i + CHUNK)
+    );
+  }
+  return btoa(binary);
+}
+
+/**
  * Call Google Gemini (vision) to get an artistic name + short description for
  * an image, given its bytes and content type.
  *
@@ -220,16 +240,16 @@ export default {
         return json(cached);
       }
 
-      // 2. Read the actual image.
-      const object = await bucket.get(artKey);
-      if (object === null) {
-        return json({ error: `Object not found: ${artKey}` }, 404);
-      }
-      const arrayBuffer = await object.arrayBuffer();
-      const bytes = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-
-      // 3. Ask Gemini.
+      // 2. Read the image and ask Gemini (keep it in try/catch so a failure in
+      //    any step returns a clean 502 instead of crashing the worker).
       try {
+        const object = await bucket.get(artKey);
+        if (object === null) {
+          return json({ error: `Object not found: ${artKey}` }, 404);
+        }
+        const arrayBuffer = await object.arrayBuffer();
+        const bytes = bytesToBase64(new Uint8Array(arrayBuffer));
+
         const result = await describeWithGemini(
           bytes,
           mimeFor(artKey),
@@ -237,13 +257,14 @@ export default {
           env.GEMINI_MODEL || 'gemini-2.0-flash'
         );
 
-        // 4. Cache it (fire-and-forget so we don't block the response).
+        // 3. Cache it (fire-and-forget so we don't block the response).
         ctx.waitUntil(
           bucket.put(`${CACHE_FOLDER}/${cacheKey}.json`, JSON.stringify(result))
         );
 
         return json(result);
       } catch (err) {
+        console.error('describe error', err);
         return json({ error: `Could not generate overview: ${err.message}` }, 502);
       }
     }
