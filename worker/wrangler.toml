@@ -10,3 +10,9 @@ compatibility_date = "2024-11-01"
 [[r2_buckets]]
 binding = "ART_BUCKET"
 bucket_name = "art-gallery"
+
+# Secrets are set with:  npx wrangler secret put GEMINI_API_KEY
+# (and optionally) GEMINI_MODEL. Do NOT commit a key here.
+# GEMINI_API_KEY  → Google Gemini (vision) API key, from
+#                   https://aistudio.google.com/app/apikey (free tier OK)
+# GEMINI_MODEL    → model name, e.g. "gemini-2.0-flash" (default)
