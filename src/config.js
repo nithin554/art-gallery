@@ -21,7 +21,7 @@ export const R2_CONFIG = {
   bucketUrl: 'https://pub-480c51a26bb64a9fbf5faa596aaf0468.r2.dev',
 
   /** URL of the listing Worker that returns the object keys as JSON. */
-  listUrl: 'https://art-gallery-42d5.nithinneeraj60.workers.dev',
+  listUrl: 'https://art-gallery-list.nithinneeraj60.workers.dev',
 
   /** Folder inside the bucket that holds the artworks. */
   folder: 'art',
