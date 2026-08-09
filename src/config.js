@@ -1,42 +1,31 @@
 /**
- * Google Photos Picker API configuration.
+ * Cloudflare R2 bucket configuration.
  *
- * This gallery uses the modern **Google Photos Picker API**
- * (https://photospicker.googleapis.com/v1/...) which lets a client-side,
- * backend-free web app request access to a *selected subset* of a user's
- * Google Photos library.
+ * This gallery reads artworks from a **public** Cloudflare R2 bucket.
+ * Upload your image files into the `art` folder, then the site discovers the
+ * files via a small **Cloudflare Worker** (see `/worker`) that lists the
+ * bucket's objects and returns their keys as JSON.
  *
- * To set it up you must:
+ * Set-up:
+ *   1. Create an R2 bucket and make it **public** (or attach a custom domain).
+ *   2. Upload your artworks to the `art/` folder.
+ *   3. Deploy the listing Worker (see `/worker` and README) to get its URL.
+ *   4. Set `bucketUrl` to your public bucket base URL and `listUrl` to the
+ *      Worker's URL below.
  *
- * 1. Create a Google Cloud Project at https://console.cloud.google.com
- * 2. Enable the **Photos Picker API** in
- *    (APIs & Services → Library → "Photos Picker API").
- * 3. Create an "API key" (APIs & Services → Credentials → Create credentials
- *    → API key) and restrict it to the Photos Picker API and to your HTTP
- *    referrer(s).
- * 4. Create an "OAuth 2.0 Client ID" for a **Web application**:
- *    - In "Authorized JavaScript origins" add your site origin, e.g.
- *      https://yourdomain.com  (for local Vite dev add http://localhost:5173).
- *    - Note the resulting Client ID.
- * 5. These scopes must be approved on your OAuth consent screen:
- *    - https://www.googleapis.com/auth/photospicker.mediaitems.readonly
- *
- * Then fill in the values below.
- *
- * ⚠️ Because this is a purely static site with no backend, the OAuth client ID
- * and API key ship to the browser. Always restrict your API key to the Photos
- * Picker API and to your own domain.
+ * The site fetches `listUrl`, gets the object keys, and renders each file as a
+ * framed artwork.
  */
-export const PICKER_CONFIG = {
-  /** Your Google Cloud API key (restricted to the Photos Picker API) */
-  apiKey: 'YOUR_GOOGLE_API_KEY',
+export const R2_CONFIG = {
+  /** Public base URL of your R2 bucket (with trailing slash stripped). */
+  bucketUrl: 'https://pub-480c51a26bb64a9fbf5faa596aaf0468.r2.dev',
 
-  /** Your OAuth 2.0 Web Application Client ID */
-  clientId: '455796875759-52o5h325ud53g5l7kgicg1v3fss35fqk.apps.googleusercontent.com',
+  /** URL of the listing Worker that returns the object keys as JSON. */
+  listUrl: 'https://art-gallery-42d5.nithinneeraj60.workers.dev',
 
-  /** The Photos Picker API endpoint base URL. */
-  baseUrl: 'https://photospicker.googleapis.com/v1',
+  /** Folder inside the bucket that holds the artworks. */
+  folder: 'art',
 
-  /** OAuth scopes required by the Photos Picker API. */
-  scopes: ['https://www.googleapis.com/auth/photospicker.mediaitems.readonly']
+  /** Optional size hint appended to image URLs (e.g. '?w=2048'). Leave '' to skip. */
+  sizeSuffix: ''
 };

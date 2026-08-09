@@ -1,0 +1,12 @@
+name = "art-gallery-list"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+# Route the listing worker at your own domain, e.g.
+# routes = [{ pattern = "list.example.com", custom_domain = true }]
+# or leave unset and use the auto workers.dev URL.
+
+# Bind the R2 bucket. Give it a short binding name and point it at your bucket.
+[[r2_buckets]]
+binding = "ART_BUCKET"
+bucket_name = "art-gallery"
