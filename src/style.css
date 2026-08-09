@@ -83,6 +83,14 @@ body.modal-open {
   color: var(--ink-dim);
 }
 
+.gallery-description {
+  max-width: 62ch;
+  margin: 1.4rem auto 0;
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--ink-dim);
+}
+
 /* ---------- Stage / wall ---------- */
 .stage {
   width: min(1440px, 94%);
