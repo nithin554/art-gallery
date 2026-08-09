@@ -117,12 +117,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # REPO_NAME makes Vite emit asset URLs under /<repo>/, which is how a
-      # project page is served (https://<user>.github.io/<repo>/).
+      # Build with the default base path "/" since the site is served from
+      # the root of a custom domain (DuckDNS).
       - name: Build the site
         run: npm run build
-        env:
-          REPO_NAME: ${{ github.event.repository.name }}
 
       - name: Configure Pages
         uses: actions/configure-pages@v6
