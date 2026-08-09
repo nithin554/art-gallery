@@ -137,7 +137,8 @@ To enable it:
    Worker automatically (recommended — it never leaves GitHub/Cloudflare):
    - **Settings → Secrets and variables → Actions → New repository secret**:
      - `GEMINI_API_KEY` → your Gemini key
-     - `GEMINI_MODEL` → *(optional)* e.g. `gemini-2.0-flash`
+     - `GEMINI_MODEL` → *(optional)* model ID, e.g. `gemini-2.5-flash-lite`
+       (default) or `gemini-3.5-flash-lite`. Passed straight to the API.
    - The `Deploy R2 Listing Worker` workflow writes these as Worker secrets via
      `wrangler secret put` before each deploy (see
      `.github/workflows/deploy-worker.yml`).
