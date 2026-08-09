@@ -1,6 +1,5 @@
 import './style.css';
-import { PICKER_CONFIG } from './config.js';
-import { chooseFromPhotos } from './picker.js';
+import { isConfigured, loadGallery } from './r2.js';
 
 const STORAGE_KEY = 'art-gallery-items';
 const MAX_ITEMS = 24;
@@ -18,13 +17,14 @@ const closeLightbox = document.getElementById('closeLightbox');
 const prevImage = document.getElementById('prevImage');
 const nextImage = document.getElementById('nextImage');
 
-/** @type {Array<{id: string, name: string}>} */
+/** @type {Array<{id: string, name: string, url: string}>} */
 let items = [];
 /** @type {string|null} */
 let currentId = null;
 
 /**
- * Persist the gallery to localStorage so the wall survives reloads.
+ * Persist the gallery to localStorage so the wall survives reloads (the order
+ * people have hung the works).
  */
 function save() {
   try {
@@ -43,26 +43,29 @@ function load() {
   }
 }
 
-function hasValidKeys() {
-  return PICKER_CONFIG.clientId !== 'YOUR_GOOGLE_CLIENT_ID';
-}
-
-function showToast(message) {
+function showToast(message, durationMs = 2600) {
   toast.textContent = message;
   toast.classList.add('visible');
   clearTimeout(showToast._timer);
-  showToast._timer = setTimeout(() => toast.classList.remove('visible'), 2600);
+  showToast._timer = setTimeout(() => toast.classList.remove('visible'), durationMs);
+}
+
+function prettyName(name) {
+  return (name || 'Untitled')
+    .split('/')
+    .pop()
+    .replace(/\.[^/.]+$/, '')
+    .replace(/_/g, ' ');
 }
 
 /**
- * Render each artwork as a framed piece on the wall. Each image is shown at
- * a "thumbnail" resized by the Photos API without needing extra storage.
+ * Render each artwork as a framed piece on the wall.
  */
 function renderWall() {
   galleryWall.innerHTML = '';
   emptyState.classList.toggle('hidden', items.length > 0);
-  // Only hide the "Add photographs" action link, not the whole footer (which
-  // also carries the privacy policy and terms links).
+  // Only hide the "Refresh from the bucket" action link, not the footer
+  // (which also carries the privacy policy and terms links).
   addMoreLink.style.display = items.length ? 'inline' : 'none';
 
   items.forEach((item, index) => {
@@ -73,21 +76,19 @@ function renderWall() {
     const img = document.createElement('img');
     img.className = 'artwork-img';
     img.src = item.url;
-    img.alt = item.name || 'Artwork';
+    img.alt = prettyName(item.name);
     img.loading = 'lazy';
     img.draggable = false;
     img.addEventListener('click', () => openLightbox(index));
 
     const caption = document.createElement('figcaption');
     caption.className = 'plaque';
-    caption.textContent = item.name
-      ? item.name.replace(/\.[^/.]+$/, '').replace(/_/g, ' ')
-      : 'Untitled';
+    caption.textContent = prettyName(item.name);
 
     const remove = document.createElement('button');
     remove.className = 'artwork-remove';
     remove.type = 'button';
-    remove.setAttribute('aria-label', `Remove ${item.name}`);
+    remove.setAttribute('aria-label', `Remove ${prettyName(item.name)}`);
     remove.textContent = '×';
     remove.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -110,8 +111,8 @@ function openLightbox(index) {
   const item = items[index];
   currentId = item.id;
   lightboxImage.src = item.url;
-  lightboxImage.alt = item.name || 'Artwork';
-  lightboxCaption.textContent = item.name || 'Untitled';
+  lightboxImage.alt = prettyName(item.name);
+  lightboxCaption.textContent = prettyName(item.name);
   lightbox.classList.add('open');
   lightbox.setAttribute('aria-hidden', 'false');
   document.body.classList.add('modal-open');
@@ -140,57 +141,45 @@ function updateNav() {
 }
 
 /**
- * Launch the Photos Picker flow end-to-end: authenticate, create a session,
- * open the picker, poll for the selection, then merge into the collection.
+ * Pull the artwork list from the R2 bucket's `art` folder and hang them.
  */
-async function startPicking() {
-  if (!hasValidKeys()) {
-    showToast('Add your Google API key & client ID in src/config.js first.');
-    return;
-  }
-
-  const remaining = MAX_ITEMS - items.length;
-  if (remaining <= 0) {
-    showToast(`The gallery holds up to ${MAX_ITEMS} works.`);
+async function refreshGallery() {
+  if (!isConfigured()) {
+    showToast('Set R2_CONFIG.bucketUrl in src/config.js first.');
     return;
   }
 
   pickButton.disabled = true;
-  pickButton.textContent = 'Opening Google Photos…';
+  const original = pickButton.textContent;
+  pickButton.textContent = 'Hanging artworks…';
   try {
-    const picked = await chooseFromPhotos(Math.min(remaining, 50));
-    if (!picked.length) return;
-
-    // Keep only photos (skip videos) and de-duplicate by id.
-    const known = new Set(items.map((i) => i.id));
-    const fresh = picked
-      .filter((p) => p.type !== 'video' && !known.has(p.id))
-      .slice(0, remaining);
-
-    items.push(...fresh);
+    const gallery = await loadGallery();
+    if (!gallery.length) {
+      showToast('No artworks found in the bucket art folder.');
+      return;
+    }
+    items = gallery.slice(0, MAX_ITEMS);
     save();
     renderWall();
-    if (fresh.length) {
-      showToast(
-        fresh.length === 1
-          ? 'Added 1 work to the wall'
-          : `Added ${fresh.length} works to the wall`
-      );
-    }
+    showToast(
+      items.length === 1
+        ? 'Hung 1 work from the bucket'
+        : `Hung ${items.length} works from the bucket`
+    );
   } catch (err) {
     console.error(err);
-    showToast(`Could not open the picker: ${err.message}`);
+    showToast(`Could not load the gallery: ${err.message}`, 6000);
   } finally {
     pickButton.disabled = false;
-    pickButton.textContent = 'Add Photographs';
+    pickButton.textContent = original;
   }
 }
 
 // --- Event wiring ----------------------------------------------------------
-pickButton.addEventListener('click', startPicking);
+pickButton.addEventListener('click', refreshGallery);
 addMoreLink.addEventListener('click', (e) => {
   e.preventDefault();
-  startPicking();
+  refreshGallery();
 });
 closeLightbox.addEventListener('click', closeLightboxModal);
 prevImage.addEventListener('click', () => step(-1));
@@ -209,4 +198,8 @@ document.addEventListener('keydown', (e) => {
 
 // --- Boot ------------------------------------------------------------------
 load();
-renderWall();
+// Only auto-fill the wall on first visit. Subsequent reloads keep the
+// arrangement the visitor curated in localStorage.
+if (!items.length) {
+  refreshGallery();
+}

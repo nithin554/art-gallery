@@ -8,7 +8,7 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" href="/favicon.png" sizes="32x32" />
     <link rel="apple-touch-icon" href="/logo.svg" />
-    <meta name="description" content="The Gallery · Art Collection — a private, backend-free museum wall curated from your Google Photos library via Google's secure Photos Picker." />
+    <meta name="description" content="The Gallery · Art Collection — a private museum wall served from a Cloudflare R2 bucket." />
     <meta name="google-site-verification" content="URgYOLgzCY-V-CbXInuNNyseZdk3NOCpVA5K6nTz9Mw" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,13 +20,12 @@
   <body>
     <header class="masthead">
       <h1 class="gallery-title">The Gallery · Art Collection</h1>
-      <p class="gallery-tagline">Curate a private museum wall from your Google&nbsp;Photos</p>
+      <p class="gallery-tagline">A private museum wall served from the cloud</p>
       <p class="gallery-description">
-        The Gallery is a private, backend-free museum wall. Using Google's
-        secure Photos Picker, you hand-pick photographs from your own Google
-        Photos library, and they are matted, framed, and hung here with elegant
-        nameplates. Your curated wall lives only on your device — no account, no
-        server, no uploads.
+        The Gallery is a private museum wall. Artworks are read directly from a
+        Cloudflare R2 bucket, then matted, framed, and hung here with elegant
+        nameplates. Just add to your bucket's <em>art</em> folder and refresh —
+        the wall takes care of the rest.
       </p>
     </header>
 
@@ -35,9 +34,9 @@
         <p class="empty-icon" aria-hidden="true">🖼️</p>
         <h2>Your collection awaits</h2>
         <p class="empty-hint">
-          Select photographs from your Google Photos library to adorn these walls.
+          Artworks from your R2 bucket's <em>art</em> folder will adorn these walls.
         </p>
-        <button class="btn-primary" id="pickButton" type="button">Add Photographs</button>
+        <button class="btn-primary" id="pickButton" type="button">Hang Artworks</button>
       </section>
 
       <section class="gallery-wall" id="galleryWall" aria-live="polite"></section>
@@ -46,7 +45,7 @@
     <footer class="colophon">
       <p>
         Curated with care ·
-        <a href="#" id="addMoreLink">Add photographs</a> ·
+        <a href="#" id="addMoreLink">Refresh from the bucket</a> ·
         <a href="./privacy.html">Privacy policy</a> ·
         <a href="./terms.html">Terms of service</a>
       </p>
