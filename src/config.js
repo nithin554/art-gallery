@@ -1,31 +1,33 @@
 /**
- * Cloudflare R2 bucket configuration.
+ * Cloudflare R2 configuration.
  *
- * This gallery reads artworks from a **public** Cloudflare R2 bucket.
- * Upload your image files into the `art` folder, then the site discovers the
- * files via a small **Cloudflare Worker** (see `/worker`) that lists the
- * bucket's objects and returns their keys as JSON.
+ * This gallery reads artworks from a Cloudflare R2 bucket through a small
+ * **Cloudflare Worker** (see `/worker`). The Worker:
+ *
+ *  - `GET listUrl`            → returns the object keys in the `art` folder,
+ *                               e.g. { "files": ["sunset.jpg", ...] }
+ *  - `GET <imageBaseUrl>/img/<key>` → streams the image bytes with CORS headers
+ *                               so the browser can load them cross-origin.
  *
  * Set-up:
- *   1. Create an R2 bucket and make it **public** (or attach a custom domain).
- *   2. Upload your artworks to the `art/` folder.
- *   3. Deploy the listing Worker (see `/worker` and README) to get its URL.
- *   4. Set `bucketUrl` to your public bucket base URL and `listUrl` to the
- *      Worker's URL below.
+ *   1. Create an R2 bucket and upload your artworks into the `art` folder.
+ *   2. Deploy the Worker (see `/worker` and README) to get its URL.
+ *   3. Set `listUrl` to the Worker's URL and `imageBaseUrl` to its origin.
  *
- * The site fetches `listUrl`, gets the object keys, and renders each file as a
- * framed artwork.
+ * The site fetches the listing from `listUrl`, then renders each file through
+ * `imageBaseUrl`, avoiding the raw bucket origin (which can trip the browser's
+ * opaque-response protections when CORS isn't configured on the bucket).
  */
 export const R2_CONFIG = {
-  /** Public base URL of your R2 bucket (with trailing slash stripped). */
-  bucketUrl: 'https://pub-480c51a26bb64a9fbf5faa596aaf0468.r2.dev',
-
-  /** URL of the listing Worker that returns the object keys as JSON. */
+  /** URL of the Worker that returns the object keys as JSON (the listing). */
   listUrl: 'https://art-gallery-list.nithinneeraj60.workers.dev',
 
-  /** Folder inside the bucket that holds the artworks. */
-  folder: 'art',
+  /**
+   * Base origin (scheme + host) of the Worker used to serve image bytes at
+   * `/img/<key>`. Usually the same origin as listUrl.
+   */
+  imageBaseUrl: 'https://art-gallery-list.nithinneeraj60.workers.dev',
 
-  /** Optional size hint appended to image URLs (e.g. '?w=2048'). Leave '' to skip. */
-  sizeSuffix: ''
+  /** Folder inside the bucket that holds the artworks. */
+  folder: 'art'
 };

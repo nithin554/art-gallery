@@ -1,38 +1,34 @@
 import { R2_CONFIG } from './config.js';
 
 /**
- * Cloudflare R2 bucket client.
+ * Cloudflare R2 client.
  *
- * The bucket is **public**, so images are served at their public URLs. The list
- * of object keys is supplied by a small Cloudflare Worker (`/worker`) that the
- * browser queries for the current contents of the `art` folder.
+ * A Worker serves both the object listing (`GET listUrl`) and the image bytes
+ * (`GET <imageBaseUrl>/img/<key>`). Images are served with CORS headers by the
+ * Worker, so the browser loads them cross-origin without opaque-response
+ * blocks (ERR_BLOCKED_BY_ORB).
  */
 
-/** If the bucket URL/list URL/folder aren't configured yet. */
+/** If the worker list URL/image base URL/folder aren't configured yet. */
 export function isConfigured() {
   return (
-    R2_CONFIG.bucketUrl &&
-    R2_CONFIG.bucketUrl !== 'YOUR_R2_PUBLIC_URL' &&
     R2_CONFIG.listUrl &&
     R2_CONFIG.listUrl !== 'YOUR_WORKER_LIST_URL' &&
+    R2_CONFIG.imageBaseUrl &&
+    R2_CONFIG.imageBaseUrl !== 'YOUR_WORKER_ORIGIN' &&
     R2_CONFIG.folder
   );
 }
 
-/** Build the full bucket base + folder URL, e.g. https://cdn.example.com/art */
-function folderUrl() {
-  return `${R2_CONFIG.bucketUrl.replace(/\/+$/, '')}/${R2_CONFIG.folder.replace(/^\/+|\/+$/g, '')}`;
-}
-
-/** Build the public URL for a single object key inside the folder. */
+/** Build the Worker URL that serves a single object's bytes. */
 export function objectUrl(key) {
-  const base = `${folderUrl()}/${key.replace(/^\/+/, '')}`;
-  return R2_CONFIG.sizeSuffix ? `${base}${R2_CONFIG.sizeSuffix}` : base;
+  return `${R2_CONFIG.imageBaseUrl.replace(/\/+$/, '')}/img/${String(
+    key
+  ).replace(/^\/+/, '')}`;
 }
 
 /**
- * Query the listing Worker for the object keys, then resolve to a list of
- * artworks.
+ * Query the Worker for the object keys, then resolve to a list of artworks.
  *
  * Each item is shaped like:
  *   { id, name, url }

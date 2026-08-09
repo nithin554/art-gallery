@@ -145,7 +145,7 @@ function updateNav() {
  */
 async function refreshGallery() {
   if (!isConfigured()) {
-    showToast('Set R2_CONFIG.bucketUrl in src/config.js first.');
+    showToast('Set R2_CONFIG.listUrl in src/config.js first.');
     return;
   }
 
