@@ -113,6 +113,14 @@ function renderWall() {
     caption.className = 'plaque';
     caption.textContent = prettyName(item.name);
 
+    // Mandala petals at the frame corners.
+    const corners = ['tl', 'tr', 'bl', 'br'].map((pos) => {
+      const c = document.createElement('span');
+      c.className = `frame-corner ${pos}`;
+      c.setAttribute('aria-hidden', 'true');
+      return c;
+    });
+
     // Enrich the nameplate with the AI-curated title once ready.
     ensureDescription(item.name).then((overview) => {
       if (overview && overview.name && caption.isConnected) {
@@ -131,7 +139,7 @@ function renderWall() {
       removeItem(index);
     });
 
-    figure.append(img, caption, remove);
+    figure.append(img, caption, ...corners, remove);
     galleryWall.appendChild(figure);
   });
 }
@@ -229,12 +237,60 @@ async function refreshGallery() {
   }
 }
 
+// --- Theme switching --------------------------------------------------------
+const THEME_KEY = 'art-gallery-theme';
+const themeToggle = document.getElementById('themeToggle');
+const themeToggleIcon = document.getElementById('themeToggleIcon');
+const themeToggleLabel = themeToggle.querySelector('.theme-toggle-label');
+
+const THEME_ICONS = { dark: '🌙', light: '☀️' };
+const THEME_LABELS = { dark: 'Dark', light: 'Light' };
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  themeToggleIcon.textContent = THEME_ICONS[theme];
+  themeToggleLabel.textContent = THEME_LABELS[theme];
+  // Keep the browser chrome's theme-color in sync with the palette.
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', theme === 'light' ? '#efe6d3' : '#2a2521');
+}
+
+/**
+ * Initial theme: an explicit stored choice wins; otherwise respect the OS
+ * preference; otherwise fall back to dark (the original museum look).
+ */
+function initTheme() {
+  let theme = 'dark';
+  try {
+    const stored = localStorage.getItem(THEME_KEY);
+    if (stored === 'light' || stored === 'dark') {
+      theme = stored;
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      theme = 'light';
+    }
+  } catch {
+    /* storage unavailable — keep the default */
+  }
+  applyTheme(theme);
+}
+
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  try {
+    localStorage.setItem(THEME_KEY, next);
+  } catch {
+    /* storage unavailable — theme still applies for this session */
+  }
+}
+
 // --- Event wiring ----------------------------------------------------------
 pickButton.addEventListener('click', refreshGallery);
 addMoreLink.addEventListener('click', (e) => {
   e.preventDefault();
   refreshGallery();
 });
+themeToggle.addEventListener('click', toggleTheme);
 closeLightbox.addEventListener('click', closeLightboxModal);
 prevImage.addEventListener('click', () => step(-1));
 nextImage.addEventListener('click', () => step(1));
@@ -251,6 +307,15 @@ document.addEventListener('keydown', (e) => {
 });
 
 // --- Boot ------------------------------------------------------------------
+initTheme();
+// Respect OS theme changes while the page is open (when no explicit choice).
+if (window.matchMedia) {
+  window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
+    if (!localStorage.getItem(THEME_KEY)) {
+      applyTheme(e.matches ? 'light' : 'dark');
+    }
+  });
+}
 load();
 // Only auto-fill the wall on first visit. Subsequent reloads keep the
 // arrangement the visitor curated in localStorage.
