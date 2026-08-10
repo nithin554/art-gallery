@@ -86,6 +86,35 @@ function prettyName(name) {
     .replace(/_/g, ' ');
 }
 
+const PLAQUE_MIN_FONT_PX = 10; // below this we fall back to ellipsis clipping
+
+/**
+ * Shrink the plaque's font size so its title always fits on ONE line within
+ * the fixed plaque width, instead of wrapping and growing downward. Uses the
+ * element's own geometry to find the largest size that still fits; the CSS
+ * `text-overflow: ellipsis` only kicks in for impossibly long titles.
+ * @param {HTMLElement} el
+ */
+function fitPlaque(el) {
+  // Pick a base size from the current computed style so each theme's clamp
+  // still applies at the upper bound.
+  const base = parseFloat(getComputedStyle(el).fontSize) || 14;
+  const available = el.clientWidth;
+
+  el.style.whiteSpace = 'nowrap';
+  el.style.overflow = 'hidden';
+  el.style.textOverflow = 'ellipsis';
+
+  if (el.scrollWidth <= available + 1) return; // already fits at base size
+
+  // Step down until the text fits or we hit the floor.
+  let size = base;
+  while (size > PLAQUE_MIN_FONT_PX && el.scrollWidth > available + 1) {
+    size -= 0.5;
+    el.style.fontSize = `${size}px`;
+  }
+}
+
 /**
  * Render each artwork as a framed piece on the wall.
  */
@@ -121,11 +150,13 @@ function renderWall() {
       return c;
     });
 
-    // Enrich the nameplate with the AI-curated title once ready.
+    // Enrich the nameplate with the AI-curated title once ready, then shrink
+    // the font so it still fits on one line.
     ensureDescription(item.name).then((overview) => {
       if (overview && overview.name && caption.isConnected) {
         caption.textContent = overview.name;
         caption.title = overview.description || '';
+        fitPlaque(caption);
       }
     });
 
@@ -141,6 +172,8 @@ function renderWall() {
 
     figure.append(img, caption, ...corners, remove);
     galleryWall.appendChild(figure);
+    // Fit the (file-name) label once the plaque has its width in the layout.
+    fitPlaque(caption);
   });
 }
 
