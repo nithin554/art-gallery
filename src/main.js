@@ -86,33 +86,42 @@ function prettyName(name) {
     .replace(/_/g, ' ');
 }
 
-const PLAQUE_MIN_FONT_PX = 10; // below this we fall back to ellipsis clipping
+const PLAQUE_MIN_FONT_PX = 6; // even very long titles shrink to fit, never "..."
 
 /**
- * Shrink the plaque's font size so its title always fits on ONE line within
- * the fixed plaque width, instead of wrapping and growing downward. Uses the
- * element's own geometry to find the largest size that still fits; the CSS
- * `text-overflow: ellipsis` only kicks in for impossibly long titles.
+ * Shrink the plaque's font size so its title ALWAYS fits on one line within
+ * the fixed plaque width — no wrapping, no "..." truncation. A binary search
+ * is used to pick the largest font size that still fits, capped at the
+ * stylesheet's base size so the theme's sizing still applies at the top end.
  * @param {HTMLElement} el
  */
 function fitPlaque(el) {
-  // Pick a base size from the current computed style so each theme's clamp
-  // still applies at the upper bound.
-  const base = parseFloat(getComputedStyle(el).fontSize) || 14;
-  const available = el.clientWidth;
-
   el.style.whiteSpace = 'nowrap';
   el.style.overflow = 'hidden';
-  el.style.textOverflow = 'ellipsis';
+  el.style.textOverflow = 'clip'; // never let the browser add an ellipsis
 
-  if (el.scrollWidth <= available + 1) return; // already fits at base size
+  // Recompute from the stylesheet every time (in case a previous shrink left an
+  // inline size behind).
+  const basePx = parseFloat(getComputedStyle(el).fontSize) || 14;
+  const avail = el.clientWidth;
 
-  // Step down until the text fits or we hit the floor.
-  let size = base;
-  while (size > PLAQUE_MIN_FONT_PX && el.scrollWidth > available + 1) {
-    size -= 0.5;
-    el.style.fontSize = `${size}px`;
+  // Short-circuit if it already fits, clearing any leftover inline size.
+  el.style.fontSize = `${basePx}px`;
+  if (el.scrollWidth <= avail + 1) return;
+
+  // Binary search for the largest font (down to PLAQUE_MIN_FONT_PX) that fits.
+  let lo = PLAQUE_MIN_FONT_PX;
+  let hi = basePx;
+  while (hi - lo > 0.1) {
+    const mid = (lo + hi) / 2;
+    el.style.fontSize = `${mid}px`;
+    if (el.scrollWidth <= avail + 1) {
+      lo = mid; // fits — try a bit bigger
+    } else {
+      hi = mid - 0.1; // too big — shrink
+    }
   }
+  el.style.fontSize = `${lo}px`;
 }
 
 /**
