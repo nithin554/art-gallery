@@ -27,7 +27,7 @@
   --ink-dim: #a99e8b;
   --title-bright: #f5efdd;
   --plaque-bg: linear-gradient(180deg, var(--mat-dark), var(--mat-light));
-  --plaque-text: var(--ink-dim);
+  --plaque-text: #4a4030;
   --desc-text: var(--gold-soft);
   --overlay: rgba(15, 12, 10, 0.92);
   --overlay-panel: rgba(20, 16, 12, 0.92);
@@ -52,7 +52,7 @@
   --ink-dim: #7a6a4d;
   --title-bright: #33270f;
   --plaque-bg: linear-gradient(180deg, #f6eedd, #e8dabd);
-  --plaque-text: #6b5b3d;
+  --plaque-text: #4a3c22;
   --desc-text: #8a6a2d;
   --overlay: rgba(245, 237, 221, 0.94);
   --overlay-panel: rgba(255, 250, 240, 0.95);
@@ -427,19 +427,25 @@ body.modal-open {
   transform: translateX(-50%);
   z-index: 3;
   font-family: var(--serif);
-  font-size: clamp(0.62rem, 0.9vw, 0.78rem);
+  font-size: clamp(0.72rem, 1vw, 0.9rem);
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--plaque-text);
   background: var(--plaque-bg);
   border: 1px solid rgba(0, 0, 0, 0.35);
   border-top: 1px solid rgba(255, 255, 255, 0.5);
-  padding: 0.35rem 0.9rem;
+  padding: 0.4rem 0.9rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  max-width: 80%;
+  max-width: 92%;
+  text-align: center;
+  line-height: 1.3;
+  /* Titles are now allowed to flow onto a second line so they stay legible;
+     only very long ones are ellipsized on that last line. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* ---------- Remove control ---------- */
