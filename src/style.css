@@ -437,15 +437,13 @@ body.modal-open {
   border-top: 1px solid rgba(255, 255, 255, 0.5);
   padding: 0.4rem 0.9rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  max-width: 92%;
+  /* A fixed width so the script can size the font to fit on ONE line. */
+  width: 92%;
   text-align: center;
   line-height: 1.3;
-  /* Titles are now allowed to flow onto a second line so they stay legible;
-     only very long ones are ellipsized on that last line. */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ---------- Remove control ---------- */
