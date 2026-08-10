@@ -1,21 +1,71 @@
 /* ============================================================
-   The Gallery · A darkened museum wall
+   The Gallery · A mandala spirit · light & dark museum wall
    ============================================================ */
 
 :root {
+  /* ---------- Mandala accent palette (shared) ---------- */
+  --gold: #c9a24b;
+  --gold-soft: #e0c27a;
+  --mandala: #c9a24b;        /* accent lines of the motifs */
+  --mandala-soft: #e0c27a;   /* highlight thread */
+  --serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Dark (default) — the original dusky saloon */
+:root,
+:root[data-theme='dark'] {
   --wall: #2a2521;
   --wall-deep: #1d1916;
   --floor-hint: #17130f;
+  --panel: #30291f;
   --frame: #372f26;
   --frame-edge: #4c443a;
   --mat-light: #f2ede4;
   --mat-dark: #e2dac9;
   --ink: #e9e2d4;
   --ink-dim: #a99e8b;
-  --gold: #c9a24b;
-  --gold-soft: #e0c27a;
-  --serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-  --sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --title-bright: #f5efdd;
+  --plaque-bg: linear-gradient(180deg, var(--mat-dark), var(--mat-light));
+  --plaque-text: var(--ink-dim);
+  --desc-text: var(--gold-soft);
+  --overlay: rgba(15, 12, 10, 0.92);
+  --overlay-panel: rgba(20, 16, 12, 0.92);
+  --divider-dim: rgba(233, 226, 212, 0.08);
+  --nav-ring: rgba(233, 226, 212, 0.25);
+  --btn-text: #17130f;
+  --masthead-mandala: rgba(201, 162, 75, 0.55);
+  --mandala-faint: rgba(201, 162, 75, 0.14);
+}
+
+/* Light — a sun-warmed atelier */
+:root[data-theme='light'] {
+  --wall: #efe6d3;
+  --wall-deep: #e2d4b8;
+  --floor-hint: #cfbd9a;
+  --panel: #e7d9bd;
+  --frame: #b98f3f;
+  --frame-edge: #8a6a2d;
+  --mat-light: #fdfaf2;
+  --mat-dark: #efe6d3;
+  --ink: #3a2f1d;
+  --ink-dim: #7a6a4d;
+  --title-bright: #33270f;
+  --plaque-bg: linear-gradient(180deg, #f6eedd, #e8dabd);
+  --plaque-text: #6b5b3d;
+  --desc-text: #8a6a2d;
+  --overlay: rgba(245, 237, 221, 0.94);
+  --overlay-panel: rgba(255, 250, 240, 0.95);
+  --divider-dim: rgba(90, 70, 35, 0.14);
+  --nav-ring: rgba(90, 70, 35, 0.3);
+  --btn-text: #fbf6ea;
+  --masthead-mandala: rgba(138, 106, 45, 0.6);
+  --mandala-faint: rgba(184, 143, 63, 0.14);
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
 }
 
 * {
@@ -42,10 +92,17 @@ body {
   background-attachment: fixed;
   line-height: 1.5;
   overflow-x: hidden;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 body.modal-open {
   overflow: hidden;
+}
+
+:root,
+:root[data-theme='dark'],
+:root[data-theme='light'] {
+  scrollbar-color: var(--gold) transparent;
 }
 
 /* ---------- Masthead ---------- */
@@ -55,7 +112,39 @@ body.modal-open {
   padding: clamp(3.5rem, 10vh, 6rem) 1rem 2rem;
 }
 
+/* Radiant ring woven into the header backdrop — a mandala crown. */
+.masthead::before {
+  content: '';
+  position: absolute;
+  top: clamp(1rem, 4vh, 3rem);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(760px, 92vw);
+  height: min(300px, 36vw);
+  border-radius: 50%;
+  background:
+    repeating-conic-gradient(
+      from 0deg,
+      var(--mandala-faint) 0deg 6deg,
+      transparent 6deg 18deg
+    ),
+    radial-gradient(
+      circle,
+      var(--mandala-faint) 0 18%,
+      transparent 18% 30%,
+      var(--mandala-faint) 30% 33%,
+      transparent 33% 100%
+    ),
+    radial-gradient(circle, transparent 0 58%, var(--mandala-faint) 59% 61%, transparent 61%);
+  -webkit-mask-image: radial-gradient(circle, #000 0 55%, transparent 65%);
+          mask-image: radial-gradient(circle, #000 0 55%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
 .gallery-title {
+  position: relative;
+  z-index: 1;
   font-family: var(--serif);
   font-weight: 500;
   font-size: clamp(2rem, 6vw, 3.6rem);
@@ -76,6 +165,8 @@ body.modal-open {
 }
 
 .gallery-tagline {
+  position: relative;
+  z-index: 1;
   margin-top: 0.9rem;
   font-weight: 300;
   font-style: italic;
@@ -84,11 +175,83 @@ body.modal-open {
 }
 
 .gallery-description {
+  position: relative;
+  z-index: 1;
   max-width: 62ch;
   margin: 1.4rem auto 0;
   font-weight: 300;
   line-height: 1.6;
   color: var(--ink-dim);
+}
+
+/* ---------- Mandala ornament (✺) above the title ---------- */
+.masthead-ornament {
+  position: relative;
+  z-index: 1;
+  font-size: 1.9rem;
+  line-height: 1;
+  color: var(--gold);
+  margin: 0 auto 0.9rem;
+  width: 2.2em;
+  height: 2.2em;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--masthead-mandala);
+  border-radius: 50%;
+  text-shadow: 0 0 14px rgba(201, 162, 75, 0.4);
+  animation: mandala-spin 60s linear infinite;
+  opacity: 0.95;
+}
+
+.masthead-ornament::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border: 1px dashed var(--masthead-mandala);
+  border-radius: 50%;
+}
+
+@keyframes mandala-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Theme toggle ---------- */
+.theme-toggle {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--masthead-mandala);
+  border-radius: 999px;
+  padding: 0.5rem 0.95rem 0.5rem 0.85rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: background 0.25s ease, color 0.25s ease, transform 0.15s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--mandala);
+  color: var(--btn-text);
+}
+
+.theme-toggle:active {
+  transform: translateY(1px);
+}
+
+.theme-toggle-icon {
+  font-size: 1.05rem;
+  line-height: 1;
 }
 
 /* ---------- Stage / wall ---------- */
@@ -146,7 +309,7 @@ body.modal-open {
   font-size: 0.95rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #17130f;
+  color: var(--btn-text);
   background: linear-gradient(180deg, var(--gold-soft), var(--gold));
   border: none;
   border-radius: 2px;
@@ -216,6 +379,23 @@ body.modal-open {
   z-index: 2;
 }
 
+/* Tiny mandala petal at each corner of the frame. */
+.artwork .frame-corner {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gold-soft), var(--gold));
+  box-shadow: 0 0 5px rgba(201, 162, 75, 0.4);
+  pointer-events: none;
+  z-index: 3;
+}
+.frame-corner.tl { top: 0; left: 0; }
+.frame-corner.tr { top: 0; right: 0; }
+.frame-corner.bl { bottom: 0; left: 0; }
+.frame-corner.br { bottom: 0; right: 0; }
+
 /* White mat (mount) around the image */
 .artwork::after {
   content: '';
@@ -250,8 +430,8 @@ body.modal-open {
   font-size: clamp(0.62rem, 0.9vw, 0.78rem);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink-dim);
-  background: linear-gradient(180deg, var(--mat-dark), var(--mat-light));
+  color: var(--plaque-text);
+  background: var(--plaque-bg);
   border: 1px solid rgba(0, 0, 0, 0.35);
   border-top: 1px solid rgba(255, 255, 255, 0.5);
   padding: 0.35rem 0.9rem;
@@ -302,7 +482,7 @@ body.modal-open {
   display: none;
   align-items: center;
   justify-content: center;
-  background: rgba(15, 12, 10, 0.92);
+  background: var(--overlay);
   backdrop-filter: blur(4px);
   padding: 2rem;
 }
@@ -313,15 +493,19 @@ body.modal-open {
 
 .modal-content {
   position: relative;
-  max-width: min(90vw, 1200px);
+  max-width: min(92vw, 1200px);
   max-height: 88vh;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
   background:
     linear-gradient(160deg, var(--frame-edge), var(--frame) 45%, var(--frame));
   padding: clamp(10px, 1.2vw, 18px);
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+  /* Show the FULL image and FULL text — never clip. The image sizes itself to
+     leave room for the caption, so everything stays inside the frame. */
+  overflow: visible;
 }
 
 .modal-content::before {
@@ -332,41 +516,74 @@ body.modal-open {
   pointer-events: none;
 }
 
+/* A soft mandala halo around the enlarged frame. */
+.modal-content::after {
+  content: '';
+  position: absolute;
+  inset: -26px;
+  border-radius: 50%;
+  background:
+    repeating-conic-gradient(
+      from 0deg,
+      var(--mandala-faint) 0deg 4deg,
+      transparent 4deg 14deg
+    );
+  -webkit-mask-image: radial-gradient(circle, transparent 0 46%, #000 60% 72%, transparent 74%);
+          mask-image: radial-gradient(circle, transparent 0 46%, #000 60% 72%, transparent 74%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* The picture takes ~70% of the frame height; the caption (which can be a few
+   lines) gets the rest. Both are always fully visible. */
 .modal-content img {
   display: block;
+  width: 100%;
+  flex: 0 1 auto;
+  height: auto;
+  max-height: calc(88vh - 7rem); /* reserve room for the caption */
   max-width: 100%;
-  max-height: 78vh;
   object-fit: contain;
   background: var(--mat-light);
   padding: clamp(14px, 2vw, 32px);
+  min-height: 0;
 }
 
 .modal-caption {
   font-family: var(--serif);
-  font-size: 0.85rem;
-  letter-spacing: 0.12em;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ink-dim);
-  padding-top: 0.8rem;
-  max-width: 90%;
+  color: var(--ink);
+  padding-top: 0.9rem;
+  max-width: 94%;
   text-align: center;
+  /* No clipping, no scrollbar — every word of the description is shown. */
 }
 
 .modal-caption-title {
   display: block;
-  color: var(--ink);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--title-bright);
   letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .modal-caption-desc {
   display: block;
-  margin-top: 0.4rem;
-  font-size: 0.95rem;
+  margin-top: 0.55rem;
+  font-family: var(--sans);
+  font-size: 1.05rem;
+  font-weight: 500;
   font-style: italic;
-  line-height: 1.5;
+  line-height: 1.55;
   text-transform: none;
   letter-spacing: 0.02em;
-  color: var(--gold-soft);
+  color: var(--desc-text);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
 }
 
 .modal-nav {
@@ -376,7 +593,7 @@ body.modal-open {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  border: 1px solid rgba(233, 226, 212, 0.25);
+  border: 1px solid var(--nav-ring);
   background: rgba(0, 0, 0, 0.4);
   color: var(--ink);
   font-size: 1.8rem;
@@ -427,7 +644,7 @@ body.modal-open {
   color: var(--ink-dim);
   font-size: 0.85rem;
   letter-spacing: 0.04em;
-  border-top: 1px solid rgba(233, 226, 212, 0.08);
+  border-top: 1px solid var(--divider-dim);
   margin-top: 1rem;
 }
 
@@ -448,7 +665,7 @@ body.modal-open {
   left: 50%;
   transform: translate(-50%, 20px);
   z-index: 200;
-  background: rgba(20, 16, 12, 0.92);
+  background: var(--overlay-panel);
   border: 1px solid rgba(201, 162, 75, 0.4);
   color: var(--ink);
   font-size: 0.9rem;
@@ -479,5 +696,64 @@ body.modal-open {
   }
   .modal-next {
     right: 0.5rem;
+  }
+}
+
+/* ---------- Mobile (small phones) ---------- */
+@media (max-width: 520px) {
+  .masthead {
+    padding-top: 4.4rem; /* room for the toggle row */
+  }
+
+  /* Compact theme toggle pinned to the top so it never crowds the mandala. */
+  .theme-toggle {
+    top: 0.7rem;
+    right: 0.7rem;
+    padding: 0.35rem 0.7rem 0.35rem 0.6rem;
+    font-size: 0.72rem;
+    gap: 0.3rem;
+  }
+
+  .masthead-ornament {
+    font-size: 1.5rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .gallery-wall {
+    grid-template-columns: 1fr;
+    gap: 1.6rem;
+  }
+  .artwork-img {
+    height: 260px;
+  }
+
+  /* Unstack the lightbox for a full-bleed mobile view. */
+  .modal {
+    padding: 0.75rem;
+  }
+  .modal-content {
+    max-height: 92vh;
+    padding: 8px;
+  }
+  .modal-content img {
+    max-height: calc(92vh - 7rem);
+    padding: 12px;
+  }
+  .modal-nav {
+    width: 44px;
+    height: 44px;
+    font-size: 1.5rem;
+  }
+  .modal-prev {
+    left: 0.25rem;
+  }
+  .modal-next {
+    right: 0.25rem;
+  }
+  .modal-close {
+    top: 0.6rem;
+    right: 0.7rem;
+    width: 40px;
+    height: 40px;
   }
 }
