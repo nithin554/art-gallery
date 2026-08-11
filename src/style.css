@@ -1,407 +1,339 @@
 /* ============================================================
-   The Gallery · A mandala spirit · light & dark museum wall
+   Art Gallery · Quiet Mandala
+   Calm, art-forward. Clean framed pieces over a soft, tactile
+   background with a whispered mandala motif. Readability first.
    ============================================================ */
 
 :root {
-  /* ---------- Mandala accent palette (shared) ---------- */
-  --gold: #c9a24b;
-  --gold-soft: #e0c27a;
-  --mandala: #c9a24b;        /* accent lines of the motifs */
-  --mandala-soft: #e0c27a;   /* highlight thread */
+  --gold: #c89b42;
+  --gold-soft: #e6c276;
   --serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   --sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-/* Dark (default) — the original dusky saloon */
+/* Dark — soft warm charcoal, easy on the eyes */
 :root,
 :root[data-theme='dark'] {
-  --wall: #2a2521;
-  --wall-deep: #1d1916;
-  --floor-hint: #17130f;
-  --panel: #30291f;
-  --frame: #372f26;
-  --frame-edge: #4c443a;
-  --mat-light: #f2ede4;
-  --mat-dark: #e2dac9;
-  --ink: #e9e2d4;
-  --ink-dim: #a99e8b;
-  --title-bright: #f5efdd;
-  --plaque-bg: linear-gradient(180deg, var(--mat-dark), var(--mat-light));
-  --plaque-text: #4a4030;
-  --desc-text: var(--gold-soft);
-  --overlay: rgba(15, 12, 10, 0.92);
-  --overlay-panel: rgba(20, 16, 12, 0.92);
-  --divider-dim: rgba(233, 226, 212, 0.08);
-  --nav-ring: rgba(233, 226, 212, 0.25);
-  --btn-text: #17130f;
-  --masthead-mandala: rgba(201, 162, 75, 0.55);
-  --mandala-faint: rgba(201, 162, 75, 0.14);
-}
-
-/* Light — a sun-warmed atelier */
-:root[data-theme='light'] {
-  --wall: #efe6d3;
-  --wall-deep: #e2d4b8;
-  --floor-hint: #cfbd9a;
-  --panel: #e7d9bd;
-  --frame: #b98f3f;
-  --frame-edge: #8a6a2d;
-  --mat-light: #fdfaf2;
-  --mat-dark: #efe6d3;
-  --ink: #3a2f1d;
-  --ink-dim: #7a6a4d;
-  --title-bright: #33270f;
-  --plaque-bg: linear-gradient(180deg, #f6eedd, #e8dabd);
-  --plaque-text: #4a3c22;
-  --desc-text: #8a6a2d;
-  --overlay: rgba(245, 237, 221, 0.94);
-  --overlay-panel: rgba(255, 250, 240, 0.95);
-  --divider-dim: rgba(90, 70, 35, 0.14);
-  --nav-ring: rgba(90, 70, 35, 0.3);
-  --btn-text: #fbf6ea;
-  --masthead-mandala: rgba(138, 106, 45, 0.6);
-  --mandala-faint: rgba(184, 143, 63, 0.14);
-  color-scheme: light;
-}
-
-:root[data-theme='dark'] {
+  --bg: #1d1920;
+  --bg-deep: #151218;
+  --surface: #26212a;
+  --surface-2: #2e2831;
+  --text: #ece7ef;
+  --text-dim: #a99aa6;
+  --title: #f4f0f6;
+  --line: rgba(200, 155, 66, 0.28);
+  --frame: #2c2630;
+  --frame-edge: #3a323f;
+  --mat: #f2edf2;
+  --mat-dark: #e6dee6;
+  --plaque-text: #37272f;
+  --btn-text: #241c20;
+  --overlay: rgba(22, 18, 24, 0.92);
+  --glow: rgba(230, 194, 118, 0.25);
+  scrollbar-color: var(--gold) #151218;
   color-scheme: dark;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* Light — warm gallery cream */
+:root[data-theme='light'] {
+  --bg: #f5efe4;
+  --bg-deep: #ede4d4;
+  --surface: #faf6ee;
+  --surface-2: #f1e9da;
+  --text: #3a3230;
+  --text-dim: #7a6d66;
+  --title: #2a2423;
+  --line: rgba(140, 100, 50, 0.25);
+  --frame: #d5c6ac;
+  --frame-edge: #c0ae8f;
+  --mat: #fffdf8;
+  --mat-dark: #f2ecdf;
+  --plaque-text: #6b5438;
+  --btn-text: #fffaf0;
+  --overlay: rgba(40, 33, 30, 0.9);
+  --glow: rgba(190, 150, 90, 0.2);
+  scrollbar-color: var(--gold) #ede4d4;
+  color-scheme: light;
 }
 
-html,
-body {
-  min-height: 100vh;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { min-height: 100vh; }
 
 body {
   font-family: var(--sans);
-  color: var(--ink);
-  background:
-    radial-gradient(
-      circle at 50% 0%,
-      rgba(255, 255, 255, 0.03),
-      transparent 60%
-    ),
-    linear-gradient(180deg, var(--wall) 0%, var(--wall-deep) 100%);
+  color: var(--text);
+  background-color: var(--bg);
+  background-image:
+    /* whisper of a mandala watermark, off to the side, very faint */
+    radial-gradient(circle 90px at 8% 16%, var(--glow), transparent 60%),
+    radial-gradient(circle 140px at 92% 82%, var(--glow), transparent 62%);
   background-attachment: fixed;
-  line-height: 1.5;
+  line-height: 1.6;
   overflow-x: hidden;
-  transition: background-color 0.4s ease, color 0.4s ease;
+  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
-body.modal-open {
+body.modal-open { overflow: hidden; }
+
+/* ~s~ small drifting petals, subtle & quiet */
+.falling-petals {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
   overflow: hidden;
+  z-index: 1;
+}
+.petal {
+  position: absolute;
+  top: -8%;
+  font-size: 0.8rem;
+  color: var(--gold);
+  opacity: 0;
+  filter: drop-shadow(0 0 4px var(--glow));
+  animation: petal-fall linear forwards;
+}
+@keyframes petal-fall {
+  0%   { transform: translateY(0) translateX(0) rotate(0); opacity: 0; }
+  10%  { opacity: 0.5; }
+  85%  { opacity: 0.4; }
+  100% { transform: translateY(112vh) translateX(50px) rotate(540deg); opacity: 0; }
 }
 
-:root,
-:root[data-theme='dark'],
-:root[data-theme='light'] {
-  scrollbar-color: var(--gold) transparent;
+/* ============================================================
+   Top bar
+   ============================================================ */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.5rem;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
 }
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--sans);
+  color: var(--title);
+}
+.brand-orbit {
+  font-size: 1.3rem;
+  color: var(--gold);
+  display: inline-block;
+  animation: orbit-spin 14s linear infinite;
+}
+@keyframes orbit-spin { to { transform: rotate(360deg); } }
+.brand-text {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.topbar-right { display: flex; align-items: center; }
 
-/* ---------- Masthead ---------- */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+.theme-toggle:hover {
+  background: var(--gold);
+  color: var(--btn-text);
+  box-shadow: 0 0 14px var(--glow);
+}
+.theme-toggle-icon { display: inline-block; width: 1em; }
+
+/* ============================================================
+   Masthead
+   ============================================================ */
 .masthead {
   position: relative;
+  z-index: 2;
   text-align: center;
-  padding: clamp(3.5rem, 10vh, 6rem) 1rem 2rem;
+  padding: clamp(6.5rem, 14vh, 8.5rem) 1rem 2.5rem;
 }
-
-/* Radiant ring woven into the header backdrop — a mandala crown. */
-.masthead::before {
-  content: '';
-  position: absolute;
-  top: clamp(1rem, 4vh, 3rem);
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(760px, 92vw);
-  height: min(300px, 36vw);
-  border-radius: 50%;
-  background:
-    repeating-conic-gradient(
-      from 0deg,
-      var(--mandala-faint) 0deg 6deg,
-      transparent 6deg 18deg
-    ),
-    radial-gradient(
-      circle,
-      var(--mandala-faint) 0 18%,
-      transparent 18% 30%,
-      var(--mandala-faint) 30% 33%,
-      transparent 33% 100%
-    ),
-    radial-gradient(circle, transparent 0 58%, var(--mandala-faint) 59% 61%, transparent 61%);
-  -webkit-mask-image: radial-gradient(circle, #000 0 55%, transparent 65%);
-          mask-image: radial-gradient(circle, #000 0 55%, transparent 65%);
-  pointer-events: none;
-  z-index: 0;
+.masthead-ornament {
+  font-size: 1.8rem;
+  line-height: 1;
+  color: var(--gold);
+  margin-bottom: 0.8rem;
+  display: inline-block;
+  animation: bloom-float 5s ease-in-out infinite;
 }
-
+@keyframes bloom-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-6px) rotate(90deg); }
+}
 .gallery-title {
-  position: relative;
-  z-index: 1;
   font-family: var(--serif);
-  font-weight: 500;
-  font-size: clamp(2rem, 6vw, 3.6rem);
-  letter-spacing: 0.12em;
-  line-height: 1.15;
+  font-weight: 600;
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--ink);
-  padding: 0 0.25em;
+  color: var(--title);
+  line-height: 1.15;
 }
-
 .gallery-title::after {
   content: '';
   display: block;
-  width: 72px;
+  width: 78px;
   height: 1px;
-  margin: 1.1rem auto 0;
+  margin: 1rem auto 0;
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
-
 .gallery-tagline {
-  position: relative;
-  z-index: 1;
-  margin-top: 0.9rem;
-  font-weight: 300;
+  margin-top: 0.85rem;
   font-style: italic;
-  letter-spacing: 0.06em;
-  color: var(--ink-dim);
-}
-
-.gallery-description {
-  position: relative;
-  z-index: 1;
-  max-width: 62ch;
-  margin: 1.4rem auto 0;
   font-weight: 300;
-  line-height: 1.6;
-  color: var(--ink-dim);
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+.gallery-description {
+  max-width: 60ch;
+  margin: 1.2rem auto 0;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--text-dim);
 }
 
-/* ---------- Mandala ornament (✺) above the title ---------- */
-.masthead-ornament {
-  position: relative;
-  z-index: 1;
-  font-size: 1.9rem;
-  line-height: 1;
-  color: var(--gold);
-  margin: 0 auto 0.9rem;
-  width: 2.2em;
-  height: 2.2em;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--masthead-mandala);
-  border-radius: 50%;
-  text-shadow: 0 0 14px rgba(201, 162, 75, 0.4);
-  animation: mandala-spin 60s linear infinite;
-  opacity: 0.95;
-}
-
-.masthead-ornament::after {
-  content: '';
-  position: absolute;
-  inset: 5px;
-  border: 1px dashed var(--masthead-mandala);
-  border-radius: 50%;
-}
-
-@keyframes mandala-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* ---------- Theme toggle ---------- */
-.theme-toggle {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 5;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--sans);
-  font-size: 0.82rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink);
-  background: var(--panel);
-  border: 1px solid var(--masthead-mandala);
-  border-radius: 999px;
-  padding: 0.5rem 0.95rem 0.5rem 0.85rem;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-  transition: background 0.25s ease, color 0.25s ease, transform 0.15s ease;
-}
-
-.theme-toggle:hover {
-  background: var(--mandala);
-  color: var(--btn-text);
-}
-
-.theme-toggle:active {
-  transform: translateY(1px);
-}
-
-.theme-toggle-icon {
-  font-size: 1.05rem;
-  line-height: 1;
-}
-
-/* ---------- Stage / wall ---------- */
+/* ============================================================
+   Stage + layout
+   ============================================================ */
 .stage {
-  width: min(1440px, 94%);
+  position: relative;
+  z-index: 2;
+  width: min(1500px, 94%);
   margin: 0 auto;
   padding-bottom: 4rem;
 }
 
-.gallery-wall {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: clamp(2rem, 4vw, 3.5rem);
-  justify-items: center;
-  padding-top: 1rem;
-}
-
-/* ---------- Empty state ---------- */
+/* Empty state */
 .empty-state {
   text-align: center;
-  padding: clamp(2rem, 6vh, 4rem) 1rem;
-  border: 1px dashed rgba(201, 162, 75, 0.35);
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.12);
+  padding: clamp(3rem, 8vh, 5rem) 1.5rem;
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: 20px;
   max-width: 680px;
-  margin: 2rem auto;
+  margin: 1rem auto 2rem;
+  animation: fade-up 0.7s ease;
 }
-
-.empty-state.hidden {
-  display: none;
-}
-
-.empty-icon {
-  font-size: 3rem;
-  margin-bottom: 0.6rem;
-}
-
+@keyframes fade-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.empty-state.hidden { display: none; }
+.empty-icon { font-size: 3rem; margin-bottom: 0.5rem; color: var(--text-dim); }
 .empty-state h2 {
   font-family: var(--serif);
-  font-weight: 500;
-  font-size: 1.8rem;
-  letter-spacing: 0.04em;
-  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 1.9rem;
+  letter-spacing: 0.06em;
+  color: var(--title);
+  margin-bottom: 0.4rem;
 }
+.empty-hint { color: var(--text-dim); max-width: 42ch; margin: 0 auto 1.6rem; }
 
-.empty-hint {
-  color: var(--ink-dim);
-  max-width: 40ch;
-  margin: 0 auto 1.6rem;
-}
-
-/* ---------- Buttons ---------- */
+/* Button */
 .btn-primary {
   font-family: var(--sans);
-  font-size: 0.95rem;
-  letter-spacing: 0.12em;
+  font-size: 0.92rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--btn-text);
   background: linear-gradient(180deg, var(--gold-soft), var(--gold));
   border: none;
-  border-radius: 2px;
-  padding: 0.9rem 2.2rem;
+  border-radius: 999px;
+  padding: 0.95rem 2.6rem;
   cursor: pointer;
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25), 0 8px 20px rgba(0, 0, 0, 0.35);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.22), 0 0 6px var(--glow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
-
-.btn-primary:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.05);
-}
-
-.btn-primary:active {
-  transform: translateY(1px);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
-}
+.btn-primary:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 10px 26px rgba(0,0,0,0.25), 0 0 16px var(--glow); }
+.btn-primary:active { transform: translateY(0); }
 
 /* ============================================================
-   Artworks — the framed pieces
+   Gallery wall — clean masonry-like grid, art is the hero
    ============================================================ */
+.gallery-wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: clamp(1.8rem, 3.5vw, 3.2rem);
+  justify-items: center;
+  padding-top: 1rem;
+}
+
 .artwork {
   position: relative;
   width: 100%;
-  max-width: 380px;
-  background:
-    linear-gradient(160deg, var(--frame-edge), var(--frame) 40%, var(--frame));
-  padding: clamp(10px, 1.2vw, 16px); /* the frame lip */
-  box-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.4),
-    0 2px 0 rgba(255, 255, 255, 0.03),
-    0 18px 34px rgba(0, 0, 0, 0.55);
-  /* Subtle stagger so the wall feels hand-hung */
-  transform: translateY(var(--stagger, 0)) rotate(var(--tilt, 0));
+  max-width: 400px;
   cursor: zoom-in;
-  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.25s ease;
+  border-radius: 6px;
+  padding: 12px;               /* thin frame lip */
+  background: linear-gradient(160deg, var(--frame-edge), var(--frame) 45%, var(--frame));
+  box-shadow:
+    0 1px 0 rgba(0,0,0,0.35),
+    0 2px 0 rgba(255,255,255,0.04),
+    0 18px 40px rgba(0,0,0,0.45);
+  transform: translateY(var(--stagger, 0)) rotate(var(--tilt, 0));
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: settle-in 0.6s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  animation-delay: calc(var(--idx, 0) * 0.08s);
 }
+.artwork:nth-child(3n+1) { --stagger: 0px; --tilt: -0.4deg; }
+.artwork:nth-child(3n+2) { --stagger: 10px; --tilt: 0.3deg; }
+.artwork:nth-child(3n+3) { --stagger: 4px; --tilt: -0.2deg; }
 
-/* Varying heights give the wall its natural, museum-like rhythm */
-.artwork:nth-child(3n + 1) {
-  --stagger: 0px;
-  --tilt: -0.5deg;
-}
-.artwork:nth-child(3n + 2) {
-  --stagger: 14px;
-  --tilt: 0.4deg;
-}
-.artwork:nth-child(3n + 3) {
-  --stagger: 6px;
-  --tilt: -0.2deg;
+@keyframes settle-in {
+  0%   { transform: translateY(40px) scale(0.96); opacity: 0; }
+  100% { transform: translateY(var(--stagger, 0)) scale(1); opacity: 1; }
 }
 
 .artwork:hover {
-  transform: translateY(var(--stagger, 0)) rotate(var(--tilt, 0)) scale(1.02);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4), 0 26px 48px rgba(0, 0, 0, 0.6);
+  transform: translateY(var(--stagger, 0)) rotate(var(--tilt, 0)) translateY(-4px) scale(1.015);
+  box-shadow:
+    0 1px 0 rgba(0,0,0,0.35),
+    0 2px 0 rgba(255,255,255,0.04),
+    0 24px 52px rgba(0,0,0,0.5);
   z-index: 2;
 }
 
-/* Outer gold fillet between picture and frame */
+/* gold fillet inside the frame */
 .artwork::before {
   content: '';
   position: absolute;
-  inset: 3px;
-  border: 1px solid rgba(201, 162, 75, 0.45);
+  inset: 4px;
+  border-radius: 3px;
+  border: 1px solid var(--line);
   pointer-events: none;
   z-index: 2;
 }
 
-/* Tiny mandala petal at each corner of the frame. */
-.artwork .frame-corner {
-  position: absolute;
-  width: 9px;
-  height: 9px;
-  border: 1px solid var(--gold);
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--gold-soft), var(--gold));
-  box-shadow: 0 0 5px rgba(201, 162, 75, 0.4);
-  pointer-events: none;
-  z-index: 3;
-}
-.frame-corner.tl { top: 0; left: 0; }
-.frame-corner.tr { top: 0; right: 0; }
-.frame-corner.bl { bottom: 0; left: 0; }
-.frame-corner.br { bottom: 0; right: 0; }
-
-/* White mat (mount) around the image */
+/* white mat gives breathing room around the art */
 .artwork::after {
   content: '';
   position: absolute;
   inset: clamp(12px, 1.6vw, 20px);
-  background: var(--mat-light);
+  background: var(--mat);
+  border-radius: 3px;
   z-index: 0;
 }
 
@@ -412,33 +344,30 @@ body.modal-open {
   width: 100%;
   height: 300px;
   object-fit: cover;
-  margin: 0;
-  /* Matting */
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
   background: var(--mat-dark);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
   user-select: none;
 }
 
-/* ---------- Plaque / nameplate ---------- */
+/* plaque */
 .plaque {
   position: absolute;
-  bottom: clamp(6px, 1vw, 12px);
+  bottom: clamp(8px, 1.2vw, 14px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;
   font-family: var(--serif);
-  font-size: clamp(0.72rem, 1vw, 0.9rem);
+  font-size: clamp(0.72rem, 0.95vw, 0.86rem);
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--plaque-text);
-  background: var(--plaque-bg);
-  border: 1px solid rgba(0, 0, 0, 0.35);
-  border-top: 1px solid rgba(255, 255, 255, 0.5);
+  background: linear-gradient(180deg, var(--mat-dark), var(--mat));
+  border: 1px solid rgba(0,0,0,0.28);
+  border-top: 1px solid rgba(255,255,255,0.6);
+  border-radius: 3px;
   padding: 0.4rem 0.9rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  /* A fixed width so the script can size the font to fit on ONE line. */
-  width: 92%;
+  width: 88%;
   text-align: center;
   line-height: 1.3;
   white-space: nowrap;
@@ -446,35 +375,44 @@ body.modal-open {
   text-overflow: ellipsis;
 }
 
-/* ---------- Remove control ---------- */
+/* corner petals, quiet */
+.frame-corner {
+  position: absolute;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1px solid var(--gold);
+  background: radial-gradient(circle, var(--gold-soft), var(--gold));
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0.7;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.frame-corner.tl { top: 0; left: 0; }
+.frame-corner.tr { top: 0; right: 0; }
+.frame-corner.bl { bottom: 0; left: 0; }
+.frame-corner.br { bottom: 0; right: 0; }
+.artwork:hover .frame-corner { transform: scale(1.4); opacity: 1; }
+
+/* remove */
 .artwork-remove {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 0; right: 0;
   z-index: 4;
-  width: 28px;
-  height: 28px;
+  width: 28px; height: 28px;
   border: none;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.55);
-  color: var(--ink);
-  font-size: 1.1rem;
+  background: rgba(120, 40, 55, 0.85);
+  color: #fff;
+  font-size: 1.05rem;
   line-height: 1;
   cursor: pointer;
   opacity: 0;
   transform: translateY(-4px);
-  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  transition: opacity 0.25s ease, transform 0.25s ease, background 0.25s ease;
 }
-
 .artwork:hover .artwork-remove,
-.artwork-remove:focus-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.artwork-remove:hover {
-  background: rgba(160, 40, 30, 0.85);
-}
+.artwork-remove:focus-visible { opacity: 1; transform: translateY(0); }
+.artwork-remove:hover { background: #c2405c; }
 
 /* ============================================================
    Lightbox
@@ -487,277 +425,165 @@ body.modal-open {
   align-items: center;
   justify-content: center;
   background: var(--overlay);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
   padding: 2rem;
 }
-
-.modal.open {
-  display: flex;
-}
+.modal.open { display: flex; animation: fade-in 0.3s ease; }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
 .modal-content {
   position: relative;
-  max-width: min(92vw, 1200px);
-  max-height: 88vh;
+  max-width: min(94vw, 1200px);
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  background:
-    linear-gradient(160deg, var(--frame-edge), var(--frame) 45%, var(--frame));
-  padding: clamp(10px, 1.2vw, 18px);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
-  /* Show the FULL image and FULL text — never clip. The image sizes itself to
-     leave room for the caption, so everything stays inside the frame. */
-  overflow: visible;
+  justify-content: center;
+  gap: 0.7rem;
+  background: linear-gradient(160deg, var(--frame-edge), var(--frame) 45%, var(--frame));
+  padding: clamp(12px, 1.8vw, 22px);
+  border-radius: 8px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.7);
+  animation: rise-in 0.4s ease;
 }
-
+@keyframes rise-in { from { transform: translateY(16px) scale(0.97); opacity: 0; } to { transform: none; opacity: 1; } }
 .modal-content::before {
   content: '';
   position: absolute;
-  inset: 3px;
-  border: 1px solid rgba(201, 162, 75, 0.5);
+  inset: 4px;
+  border-radius: 5px;
+  border: 1px solid var(--line);
   pointer-events: none;
 }
-
-/* A soft mandala halo around the enlarged frame. */
-.modal-content::after {
-  content: '';
-  position: absolute;
-  inset: -26px;
-  border-radius: 50%;
-  background:
-    repeating-conic-gradient(
-      from 0deg,
-      var(--mandala-faint) 0deg 4deg,
-      transparent 4deg 14deg
-    );
-  -webkit-mask-image: radial-gradient(circle, transparent 0 46%, #000 60% 72%, transparent 74%);
-          mask-image: radial-gradient(circle, transparent 0 46%, #000 60% 72%, transparent 74%);
-  pointer-events: none;
-  z-index: -1;
-}
-
-/* The picture takes ~70% of the frame height; the caption (which can be a few
-   lines) gets the rest. Both are always fully visible. */
 .modal-content img {
   display: block;
   width: 100%;
-  flex: 0 1 auto;
   height: auto;
-  max-height: calc(88vh - 7rem); /* reserve room for the caption */
-  max-width: 100%;
+  max-height: calc(86vh - 8rem);
   object-fit: contain;
-  background: var(--mat-light);
-  padding: clamp(14px, 2vw, 32px);
-  min-height: 0;
+  background: var(--mat);
+  padding: clamp(14px, 2.5vw, 34px);
+  border-radius: 4px;
 }
-
 .modal-caption {
   font-family: var(--serif);
-  font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ink);
-  padding-top: 0.9rem;
-  max-width: 94%;
+  letter-spacing: 0.1em;
   text-align: center;
-  /* No clipping, no scrollbar — every word of the description is shown. */
+  color: var(--title);
+  max-width: 92%;
 }
-
 .modal-caption-title {
   display: block;
-  font-size: 1.35rem;
+  font-size: 1.4rem;
   font-weight: 700;
-  color: var(--title-bright);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  letter-spacing: 0.13em;
 }
-
 .modal-caption-desc {
   display: block;
-  margin-top: 0.55rem;
+  margin-top: 0.5rem;
   font-family: var(--sans);
-  font-size: 1.05rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 400;
   font-style: italic;
-  line-height: 1.55;
   text-transform: none;
   letter-spacing: 0.02em;
-  color: var(--desc-text);
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+  color: var(--gold-soft);
 }
 
 .modal-nav {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 52px;
-  height: 52px;
+  width: 50px; height: 50px;
   border-radius: 50%;
-  border: 1px solid var(--nav-ring);
-  background: rgba(0, 0, 0, 0.4);
-  color: var(--ink);
-  font-size: 1.8rem;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(0,0,0,0.45);
+  color: var(--title);
+  font-size: 1.7rem;
   line-height: 1;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease;
 }
-
-.modal-nav:hover {
-  background: var(--gold);
-  color: #17130f;
-}
-
-.modal-prev {
-  left: 1.5rem;
-}
-.modal-next {
-  right: 1.5rem;
-}
+.modal-nav:hover { background: var(--gold); color: var(--btn-text); }
+.modal-prev { left: 1.5rem; }
+.modal-next { right: 1.5rem; }
 
 .modal-close {
   position: absolute;
-  top: 1.25rem;
-  right: 1.5rem;
-  width: 44px;
-  height: 44px;
+  top: 1.25rem; right: 1.5rem;
+  width: 44px; height: 44px;
   border-radius: 50%;
   border: none;
-  background: rgba(0, 0, 0, 0.5);
-  color: var(--ink);
-  font-size: 1.6rem;
+  background: rgba(0,0,0,0.5);
+  color: var(--title);
+  font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
   transition: background 0.2s ease;
 }
-
-.modal-close:hover {
-  background: var(--gold);
-  color: #17130f;
-}
+.modal-close:hover { background: var(--gold); color: var(--btn-text); }
 
 /* ============================================================
-   Colophon / footer
+   Footer
    ============================================================ */
 .colophon {
+  position: relative;
+  z-index: 2;
   text-align: center;
   padding: 0.5rem 1rem 2.5rem;
-  color: var(--ink-dim);
+  color: var(--text-dim);
   font-size: 0.85rem;
-  letter-spacing: 0.04em;
-  border-top: 1px solid var(--divider-dim);
+  border-top: 1px solid var(--line);
   margin-top: 1rem;
 }
-
 .colophon a {
-  color: var(--gold-soft);
+  color: var(--gold);
   text-decoration: none;
-  border-bottom: 1px solid rgba(201, 162, 75, 0.4);
+  border-bottom: 1px solid var(--line);
+  transition: color 0.2s ease;
 }
+.colophon a:hover { color: var(--gold-soft); }
 
-.colophon a:hover {
-  border-bottom-color: var(--gold-soft);
-}
-
-/* ---------- Toast ---------- */
+/* Toast */
 .toast {
   position: fixed;
   bottom: 2rem;
   left: 50%;
   transform: translate(-50%, 20px);
   z-index: 200;
-  background: var(--overlay-panel);
-  border: 1px solid rgba(201, 162, 75, 0.4);
-  color: var(--ink);
-  font-size: 0.9rem;
+  background: color-mix(in srgb, var(--surface) 95%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 0.88rem;
   letter-spacing: 0.03em;
-  padding: 0.8rem 1.4rem;
-  border-radius: 2px;
+  padding: 0.75rem 1.6rem;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.3);
 }
+.toast.visible { opacity: 1; transform: translate(-50%, 0); }
 
-.toast.visible {
-  opacity: 1;
-  transform: translate(-50%, 0);
-}
-
-/* ---------- Responsive ---------- */
+/* Responsive */
 @media (max-width: 720px) {
-  .gallery-wall {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 2rem;
-  }
-  .artwork-img {
-    height: 240px;
-  }
-  .modal-prev {
-    left: 0.5rem;
-  }
-  .modal-next {
-    right: 0.5rem;
-  }
+  .gallery-wall { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1.6rem; }
+  .artwork-img { height: 230px; }
+  .modal-prev { left: 0.4rem; }
+  .modal-next { right: 0.4rem; }
 }
-
-/* ---------- Mobile (small phones) ---------- */
 @media (max-width: 520px) {
-  .masthead {
-    padding-top: 4.4rem; /* room for the toggle row */
-  }
-
-  /* Compact theme toggle pinned to the top so it never crowds the mandala. */
-  .theme-toggle {
-    top: 0.7rem;
-    right: 0.7rem;
-    padding: 0.35rem 0.7rem 0.35rem 0.6rem;
-    font-size: 0.72rem;
-    gap: 0.3rem;
-  }
-
-  .masthead-ornament {
-    font-size: 1.5rem;
-    margin-bottom: 0.6rem;
-  }
-
-  .gallery-wall {
-    grid-template-columns: 1fr;
-    gap: 1.6rem;
-  }
-  .artwork-img {
-    height: 260px;
-  }
-
-  /* Unstack the lightbox for a full-bleed mobile view. */
-  .modal {
-    padding: 0.75rem;
-  }
-  .modal-content {
-    max-height: 92vh;
-    padding: 8px;
-  }
-  .modal-content img {
-    max-height: calc(92vh - 7rem);
-    padding: 12px;
-  }
-  .modal-nav {
-    width: 44px;
-    height: 44px;
-    font-size: 1.5rem;
-  }
-  .modal-prev {
-    left: 0.25rem;
-  }
-  .modal-next {
-    right: 0.25rem;
-  }
-  .modal-close {
-    top: 0.6rem;
-    right: 0.7rem;
-    width: 40px;
-    height: 40px;
-  }
+  .topbar { padding: 0.7rem 1rem; }
+  .brand-text { font-size: 1rem; }
+  .theme-toggle { font-size: 0.7rem; padding: 0.35rem 0.7rem; }
+  .masthead { padding-top: 6rem; }
+  .gallery-wall { grid-template-columns: 1fr; gap: 1.6rem; }
+  .artwork-img { height: 260px; }
+  .modal { padding: 0.7rem; }
+  .modal-content img { max-height: calc(90vh - 8rem); padding: 12px; }
+  .modal-nav { width: 42px; height: 42px; font-size: 1.4rem; }
+  .modal-prev { left: 0.15rem; }
+  .modal-next { right: 0.15rem; }
+  .modal-close { top: 0.6rem; right: 0.7rem; width: 40px; height: 40px; }
 }

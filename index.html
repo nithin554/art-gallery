@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#2a2521" />
+    <meta name="theme-color" content="#1f1a20" />
     <title>My Art Collection</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" href="/favicon.png" sizes="32x32" />
@@ -18,26 +18,40 @@
     />
   </head>
   <body>
-    <header class="masthead">
-      <div class="masthead-ornament" aria-hidden="true">✺</div>
+    <div class="falling-petals" id="fallingPetals" aria-hidden="true"></div>
+
+    <nav class="topbar">
       <button
-        class="theme-toggle"
-        id="themeToggle"
+        class="brand"
+        id="brandHome"
         type="button"
-        aria-label="Toggle light / dark mode"
-        title="Toggle light / dark mode"
+        aria-label="Home"
       >
-        <span class="theme-toggle-icon" id="themeToggleIcon" aria-hidden="true">🌙</span>
-        <span class="theme-toggle-label">Dark</span>
+        <span class="brand-orbit" aria-hidden="true">✿</span>
+        <span class="brand-text">Art Gallery</span>
       </button>
+      <div class="topbar-right">
+        <button
+          class="theme-toggle"
+          id="themeToggle"
+          type="button"
+          aria-label="Toggle light / dark mode"
+          title="Toggle light / dark mode"
+        >
+          <span class="theme-toggle-icon" id="themeToggleIcon" aria-hidden="true">🌙</span>
+          <span class="theme-toggle-label">Dark</span>
+        </button>
+      </div>
+    </nav>
+
+    <header class="masthead">
+      <div class="masthead-ornament" aria-hidden="true">✿</div>
       <h1 class="gallery-title">My Art Collection</h1>
-      <p class="gallery-tagline">A wall of works I love, collected with heart</p>
+      <p class="gallery-tagline">A wall of works I love, gathered with heart</p>
       <p class="gallery-description">
-        This is a personal museum wall — a home for the pieces that make me
+        This is a personal collection — a home for the pieces that make me
         stop and breathe. Every artwork here is one I've fallen for: the bold
-        strokes, the quiet details, the way light plays across a surface. I've
-        matted, framed, and hung each one with care, because great art deserves
-        to be seen the way it was meant to be.
+        strokes, the quiet details, the way light plays across a surface.
       </p>
     </header>
 
