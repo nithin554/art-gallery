@@ -265,10 +265,11 @@ async function refreshGallery() {
     items = gallery.slice(0, MAX_ITEMS);
     save();
     renderWall();
+    celebrate();
     showToast(
       items.length === 1
-        ? 'Hung 1 work from the bucket'
-        : `Hung ${items.length} works from the bucket`
+        ? 'Hung 1 work from the bucket ✿'
+        : `Hung ${items.length} works from the bucket ✿`
     );
   } catch (err) {
     console.error(err);
@@ -294,7 +295,7 @@ function applyTheme(theme) {
   themeToggleLabel.textContent = THEME_LABELS[theme];
   // Keep the browser chrome's theme-color in sync with the palette.
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', theme === 'light' ? '#efe6d3' : '#2a2521');
+  if (meta) meta.setAttribute('content', theme === 'light' ? '#f7f1e6' : '#1f1a20');
 }
 
 /**
@@ -326,7 +327,75 @@ function toggleTheme() {
   }
 }
 
+// --- Floating mandala petals ----------------------------------------------
+const PETAL_GLYPHS = ['❀', '❁', '✿', '🌸', '✺'];
+const palette = () => {
+  // Keep the accent family, varied between gold and a few soft hues.
+  const theme = document.documentElement.getAttribute('data-theme');
+  return theme === 'light'
+    ? ['#f0b94e', '#ff8a6b', '#c9a0f0', '#7fe0c8', '#ff9bc0', '#f6c96b']
+    : ['#f6c96b', '#ffe7b3', '#ff8a6b', '#c9a0f0', '#7fe0c8', '#ff9bc0'];
+};
+
+/**
+ * Spawn a burst of petals at a given screen position (celebratory). If no
+ * element is supplied, petals fall from the top across the whole viewport.
+ */
+function rainPetals(opts = {}) {
+  const layer = document.getElementById('fallingPetals');
+  if (!layer) return;
+
+  const burst = opts.burst || false;
+  const colors = palette();
+  const count = opts.count || (burst ? 18 : 1);
+  const duration = opts.duration || (burst ? 2600 : 8000);
+  const origin = opts.origin || null; // {x, y} client coords
+
+  for (let i = 0; i < count; i++) {
+    const petal = document.createElement('span');
+    petal.className = 'petal';
+    petal.textContent = PETAL_GLYPHS[Math.floor(Math.random() * PETAL_GLYPHS.length)];
+    petal.style.color = colors[Math.floor(Math.random() * colors.length)];
+    petal.style.fontSize = `${0.7 + Math.random() * 1.1}rem`;
+
+    // Start position.
+    if (origin) {
+      const spread = 120;
+      petal.style.left = `${origin.x + (Math.random() - 0.5) * spread}px`;
+      petal.style.top = `${origin.y + (Math.random() - 0.5) * spread}px`;
+    } else {
+      petal.style.left = `${Math.random() * 100}vw`;
+    }
+
+    petal.style.animationDuration = `${duration + Math.random() * 900}ms`;
+    petal.style.animationDelay = `${burst ? Math.random() * 300 : 0}ms`;
+    if (burst) petal.style.animationPlayState = 'running';
+
+    layer.appendChild(petal);
+    petal.addEventListener('animationend', () => petal.remove());
+  }
+}
+
+/** Keep a gentle, constant sprinkle of petals across the page. */
+function startPetalDrift() {
+  const interval = setInterval(() => rainPetals({ count: 3 }), 1800);
+  // Never block the tab from unloading.
+  window.addEventListener('beforeunload', () => clearInterval(interval));
+}
+
+/** Confetti-like celebration when the wall gets (re)hung. */
+function celebrate() {
+  const burstOrigin = { x: window.innerWidth / 2, y: window.innerHeight / 4 };
+  rainPetals({ burst: true, count: 22, origin: burstOrigin });
+}
+
 // --- Event wiring ----------------------------------------------------------
+const brandHome = document.getElementById('brandHome');
+if (brandHome) {
+  brandHome.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
 pickButton.addEventListener('click', refreshGallery);
 addMoreLink.addEventListener('click', (e) => {
   e.preventDefault();
@@ -350,6 +419,7 @@ document.addEventListener('keydown', (e) => {
 
 // --- Boot ------------------------------------------------------------------
 initTheme();
+startPetalDrift();
 // Respect OS theme changes while the page is open (when no explicit choice).
 if (window.matchMedia) {
   window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
