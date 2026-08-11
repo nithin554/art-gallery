@@ -40,18 +40,21 @@
   --bg-deep: #ede4d4;
   --surface: #faf6ee;
   --surface-2: #f1e9da;
-  --text: #3a3230;
-  --text-dim: #7a6d66;
-  --title: #2a2423;
-  --line: rgba(140, 100, 50, 0.25);
+  --text: #2e2725;
+  --text-dim: #5c4f49;
+  --title: #241d1b;
+  --line: rgba(140, 100, 50, 0.3);
   --frame: #d5c6ac;
   --frame-edge: #c0ae8f;
   --mat: #fffdf8;
   --mat-dark: #f2ecdf;
-  --plaque-text: #6b5438;
-  --btn-text: #fffaf0;
+  --plaque-text: #58422a;
+  --btn-text: #3a2612;
   --overlay: rgba(40, 33, 30, 0.9);
-  --glow: rgba(190, 150, 90, 0.2);
+  --glow: rgba(190, 150, 90, 0.22);
+  /* readable gold accent on light backgrounds */
+  --gold: #a67c2c;
+  --gold-soft: #bf9541;
   scrollbar-color: var(--gold) #ede4d4;
   color-scheme: light;
 }
@@ -205,14 +208,14 @@ body.modal-open { overflow: hidden; }
 .gallery-tagline {
   margin-top: 0.85rem;
   font-style: italic;
-  font-weight: 300;
+  font-weight: 400;
   letter-spacing: 0.06em;
   color: var(--text-dim);
 }
 .gallery-description {
   max-width: 60ch;
   margin: 1.2rem auto 0;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.7;
   color: var(--text-dim);
 }
@@ -488,7 +491,7 @@ body.modal-open { overflow: hidden; }
   font-style: italic;
   text-transform: none;
   letter-spacing: 0.02em;
-  color: var(--gold-soft);
+  color: var(--text-dim);
 }
 
 .modal-nav {
@@ -497,15 +500,15 @@ body.modal-open { overflow: hidden; }
   transform: translateY(-50%);
   width: 50px; height: 50px;
   border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.3);
-  background: rgba(0,0,0,0.45);
-  color: var(--title);
+  border: 1px solid rgba(255,255,255,0.35);
+  background: rgba(0,0,0,0.5);
+  color: #f2edf2;
   font-size: 1.7rem;
   line-height: 1;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease;
 }
-.modal-nav:hover { background: var(--gold); color: var(--btn-text); }
+.modal-nav:hover { background: var(--gold); color: #241c20; }
 .modal-prev { left: 1.5rem; }
 .modal-next { right: 1.5rem; }
 
@@ -516,13 +519,13 @@ body.modal-open { overflow: hidden; }
   border-radius: 50%;
   border: none;
   background: rgba(0,0,0,0.5);
-  color: var(--title);
+  color: #f2edf2;
   font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
   transition: background 0.2s ease;
 }
-.modal-close:hover { background: var(--gold); color: var(--btn-text); }
+.modal-close:hover { background: var(--gold); color: #241c20; }
 
 /* ============================================================
    Footer
