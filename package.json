@@ -13,7 +13,7 @@
     "worker:deploy": "wrangler deploy --config worker/wrangler.toml"
   },
   "devDependencies": {
-    "vite": "^8.3.7",
+    "vite": "^8.3.8",
     "wrangler": "^4.160.0"
   }
 }
